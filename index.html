@@ -184,7 +184,10 @@
 <div class="grid-container">
     <div class="card" onclick="mostrarAba('Grade')"><span>📅</span>Grade</div>
     <div class="card" onclick="mostrarAba('Grupos')"><span>👥</span>Grupos</div>
-    <div class="card" onclick="mostrarAba('Avisos')"><span>🔔</span>Avisos</div>
+    <div class="card" onclick="mostrarAba('Avisos'); limparNotificacao()">
+    <span id="badge-avisos" class="notification-badge">NOVO</span>
+    <span>🔔</span>Avisos
+</div>
     <div class="card" onclick="mostrarAba('Links')"><span>📸</span>Fotos</div>
 </div>
 
@@ -296,5 +299,6 @@
 </script>
 </body>
 </html>
+
 
 
