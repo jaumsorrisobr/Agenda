@@ -227,7 +227,18 @@
         const status = document.getElementById('status-bar');
         try {
             const res = await fetch(URL_API);
-            dadosApp = await res.json();
+            const novosDados = await res.json();
+            
+            // --- LÓGICA DA BOLINHA DE NOTIFICAÇÃO ---
+            const cacheAntigo = JSON.parse(localStorage.getItem('cache_medicina'));
+            if (cacheAntigo && cacheAntigo.Avisos && novosDados.Avisos) {
+                // Se o número de avisos na planilha for maior que o que está guardado no celular
+                if (novosDados.Avisos.length > cacheAntigo.Avisos.length) {
+                    document.getElementById('badge-avisos').style.display = 'block';
+                }
+            }
+
+            dadosApp = novosDados;
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
         } catch (e) {
@@ -239,6 +250,11 @@
         }
     }
 
+    // Função para sumir a bolinha quando o usuário clicar em Avisos
+    function limparNotificacao() {
+        const badge = document.getElementById('badge-avisos');
+        if(badge) badge.style.display = 'none';
+    }
     function mostrarAba(nomeAba) {
         const modal = document.getElementById('meuModal');
         const titulo = document.getElementById('modal-titulo');
@@ -299,6 +315,7 @@
 </script>
 </body>
 </html>
+
 
 
 
