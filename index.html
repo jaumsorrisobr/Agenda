@@ -230,11 +230,19 @@
             const res = await fetch(URL_API);
             const novosDados = await res.json();
             
-            // --- LÓGICA DA BOLINHA DE NOTIFICAÇÃO ---
             const cacheAntigo = JSON.parse(localStorage.getItem('cache_medicina'));
-            if (cacheAntigo && cacheAntigo.Avisos && novosDados.Avisos) {
-                // Se o número de avisos na planilha for maior que o que está guardado no celular
-                if (novosDados.Avisos.length > cacheAntigo.Avisos.length) {
+            
+            // --- NOVA LÓGICA DE NOTIFICAÇÃO (POR CONTEÚDO) ---
+            if (cacheAntigo && cacheAntigo.Avisos && novosDados.Avisos && novosDados.Avisos.length > 0) {
+                
+                // Pegamos o último aviso da planilha (que é o mais novo)
+                const ultimoAvisoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Título;
+                
+                // Pegamos o último aviso que estava no cache
+                const ultimoAvisoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Título;
+
+                // Se o título do mais novo for diferente do que temos guardado, notifica!
+                if (ultimoAvisoNovo !== ultimoAvisoCache) {
                     document.getElementById('badge-avisos').style.display = 'block';
                 }
             }
@@ -316,6 +324,7 @@
 </script>
 </body>
 </html>
+
 
 
 
