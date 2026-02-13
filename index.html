@@ -37,27 +37,13 @@
         }
 
         /* --- CLASSES DA GRADE --- */
-        .grade-item {
-            display: flex;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--shadow);
-            align-items: flex-start;
-        }
+        .grade-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--shadow); align-items: flex-start; }
         .grade-item:last-child { border-bottom: none; }
-        .grade-hora {
-            flex: 0 0 75px;
-            font-size: 0.8em;
-            font-weight: 800;
-            color: var(--p-med);
-            text-align: right;
-            padding-top: 2px;
-        }
+        .grade-hora { flex: 0 0 75px; font-size: 0.8em; font-weight: 800; color: var(--p-med); text-align: right; padding-top: 2px; }
         .grade-info { flex: 1; text-align: left; }
         .grade-materia { font-weight: bold; font-size: 0.95em; display: block; color: var(--text-color); }
         .grade-grupo { font-size: 0.8em; color: #888; margin-top: 3px; display: block; }
 
-        /* --- RESTANTE DO LAYOUT --- */
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s; }
         .logo-animado { width: 180px; animation: pulsar 2s infinite; }
         @keyframes pulsar { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -75,40 +61,29 @@
         .modal-content { background: var(--card-bg); padding: 20px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; position: relative; }
         .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); cursor: pointer; }
         
-        .search-container { position: sticky; top: -21px; background: var(--card-bg); z-index: 10; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid var(--shadow); }
-        .search-input { width: 100%; height: 45px; padding: 0 15px; border-radius: 10px; border: none; background: var(--input-bg); color: var(--text-color); font-size: 16px; }
-
         .materia-retratil { margin-bottom: 10px; border: 1px solid var(--shadow); border-radius: 12px; background: var(--card-bg); overflow: hidden; width: 100%; }
         summary::-webkit-details-marker { display: none !important; }
         summary { list-style: none !important; outline: none; }
 
         .materia-sumario { 
-            background: rgba(0,123,255,0.07); 
-            font-weight: 800; 
-            color: var(--p-med); 
-            text-transform: uppercase; 
-            font-size: 0.8em; 
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 14px 15px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
+            background: rgba(0,123,255,0.07); font-weight: 800; color: var(--p-med); text-transform: uppercase; font-size: 0.8em; 
+            display: flex !important; justify-content: space-between !important; align-items: center !important; 
+            padding: 14px 15px !important; width: 100% !important; box-sizing: border-box !important;
         }
         .materia-sumario::after { content: '📁'; font-size: 1.1em; }
         .materia-retratil[open] .materia-sumario::after { content: '📂'; }
 
-        .arquivo-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px;
-            text-decoration: none; color: var(--text-color); width: 100%; box-sizing: border-box;
+        .btn-sugestao {
+            display: block; width: 100%; margin-top: 20px; padding: 12px; background: transparent;
+            border: 1px dashed var(--p-med); color: var(--p-med); border-radius: 10px;
+            text-align: center; text-decoration: none; font-size: 0.85em; font-weight: 600;
         }
 
+        .arquivo-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: var(--text-color); width: 100%; box-sizing: border-box; }
         ul.lista-integrantes { padding: 0 15px 15px 35px !important; margin: 0 !important; list-style-type: circle; border-left: 3px solid var(--p-med); margin-left: 15px !important; text-align: left; }
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
-
-        .footer-creditos { text-align: center; font-size: 11px; color: #888; padding: 30px 0; width: 100%; font-style: italic; opacity: 0.8; }
+        .footer-creditos { text-align: center; font-size: 11px; color: #888; padding: 30px 0; width: 100%; font-style: italic; opacity: 0.8; cursor: default; }
         
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); }
         .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
@@ -125,7 +100,7 @@
 </div>
 
 <div class="header">
-    <h2 id="tituloPrincipal" style="margin:0; cursor: pointer;">Medicina - Turma H</h2>
+    <h2 id="tituloPrincipal" style="margin:0;">Medicina - Turma H</h2>
     <div id="status-bar"></div>
 </div>
 
@@ -162,6 +137,8 @@
     </div>
 </div>
 
+<div class="footer-creditos" id="meuNomeSegredo">Desenvolvido por João Vitor Fróis Sanchez</div>
+
 <script>
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec"; 
     let dadosApp = {};
@@ -170,6 +147,7 @@
     let touchEnd = 0;
     const indicator = document.getElementById('refresh-indicator');
 
+    // --- PULL TO REFRESH ---
     window.addEventListener('touchstart', (e) => { touchStart = e.targetTouches[0].pageY; }, { passive: true });
     window.addEventListener('touchmove', (e) => {
         touchEnd = e.targetTouches[0].pageY;
@@ -188,9 +166,12 @@
         touchStart = 0; touchEnd = 0;
     });
 
-    const tituloHeader = document.getElementById('tituloPrincipal');
-    tituloHeader.addEventListener('touchstart', () => timerAdmin = setTimeout(abrirAdmin, 5000));
-    tituloHeader.addEventListener('touchend', () => clearTimeout(timerAdmin));
+    // --- SEGREDO NO NOME (5 SEGUNDOS) ---
+    const linkCreditos = document.getElementById('meuNomeSegredo');
+    linkCreditos.addEventListener('touchstart', () => {
+        timerAdmin = setTimeout(abrirAdmin, 5000);
+    });
+    linkCreditos.addEventListener('touchend', () => clearTimeout(timerAdmin));
 
     function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
     function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
@@ -247,6 +228,10 @@
         }
     }
 
+    function gerarBotaoSugestao() {
+        return `<a href="mailto:seuemail@exemplo.com?subject=Sugestão - App Medicine" class="btn-sugestao">💡 Sugerir alteração nesta aba</a>`;
+    }
+
     function mostrarAba(nomeAba) {
         const modal = document.getElementById('meuModal');
         const corpo = document.getElementById('modal-corpo');
@@ -256,13 +241,11 @@
 
         if (nomeAba === "Grade" || nomeAba === "Arquivos" || nomeAba === "Grupos") {
             const estrutura = {};
-            
             itens.forEach(item => {
                 let cat;
                 if (nomeAba === "Grade") cat = item["Dia da Semana"] || "Outros";
                 else if (nomeAba === "Arquivos") cat = item.Nome || "Geral";
                 else cat = formatarNome(item["Matéria"] || "Geral");
-
                 if (!estrutura[cat]) estrutura[cat] = [];
                 estrutura[cat].push(item);
             });
@@ -271,18 +254,12 @@
                 const det = document.createElement('details');
                 det.className = 'materia-retratil';
                 
-                // Garantia de fechamento para Grade e Grupos
-                if (nomeAba === "Grade" || nomeAba === "Grupos") {
-                    det.addEventListener('toggle', function() {
-                        if (this.open) {
-                            // Quando abrir um, fecha todos os outros do mesmo modal
-                            const todos = corpo.querySelectorAll('.materia-retratil');
-                            todos.forEach(outro => {
-                                if (outro !== this) outro.open = false;
-                            });
-                        }
-                    });
-                }
+                // FECHA O ANTERIOR AO ABRIR NOVO
+                det.addEventListener('toggle', function() {
+                    if (this.open) {
+                        corpo.querySelectorAll('.materia-retratil').forEach(o => { if (o !== this) o.open = false; });
+                    }
+                });
 
                 let conteudoInterno = "";
                 if (nomeAba === "Grade") {
@@ -297,13 +274,10 @@
                 } else if (nomeAba === "Arquivos") {
                     conteudoInterno = estrutura[cat].map(arq => `
                         <a href="${arq.Link}" target="_blank" class="arquivo-item">
-                            <div style="font-size: 0.95em; font-weight: 500; text-align: left; flex: 1; padding-right: 10px; word-break: break-word;">
-                                ${arq.Descrição || 'Ver Arquivo'}
-                            </div>
+                            <div style="font-size: 0.95em; font-weight: 500; text-align: left; flex: 1; padding-right: 10px; word-break: break-word;">${arq.Descrição || 'Ver Arquivo'}</div>
                             <span style="color: var(--p-med); flex-shrink: 0;">🔗</span>
                         </a>`).join('');
                 } else {
-                    // Lógica de Grupos
                     const grps = {};
                     estrutura[cat].forEach(i => {
                         const g = formatarNome(i["Nome do Grupo"] || "Sem Nome");
@@ -313,8 +287,7 @@
                     conteudoInterno = Object.keys(grps).map(g => `
                         <details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px; width: 100%;">
                             <summary style="padding:12px; font-size:0.9em; font-weight:bold; cursor:pointer; display: flex; justify-content: space-between; align-items: center; text-align: left;">
-                                <span>${g}</span>
-                                <small style="color: #888; margin-left:10px;">${grps[g].length} ▾</small>
+                                <span>${g}</span> <small style="color: #888; margin-left:10px;">${grps[g].length} ▾</small>
                             </summary>
                             <ul class="lista-integrantes">${grps[g].map(n => `<li>${n}</li>`).join('')}</ul>
                         </details>`).join('');
@@ -323,34 +296,17 @@
                 det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding: 12px; box-sizing: border-box;">${conteudoInterno}</div>`;
                 corpo.appendChild(det);
             }
+            corpo.innerHTML += gerarBotaoSugestao();
         } else {
-            // Lógica para Avisos
             itens.slice().reverse().forEach(item => {
                 const div = document.createElement('div');
-                div.style.padding = "15px"; 
-                div.style.borderBottom = "1px solid var(--shadow)";
-                div.style.textAlign = "left";
-                div.innerHTML = `
-                    <div style="font-weight: bold; color: var(--p-med);">${item.Titulo || ''}</div>
-                    <div style="font-size: 0.9em; color: var(--text-color); margin-top: 4px;">${item.Mensagem || ''}</div>
-                `;
+                div.style.padding = "15px"; div.style.borderBottom = "1px solid var(--shadow)"; div.style.textAlign = "left";
+                div.innerHTML = `<div style="font-weight: bold; color: var(--p-med);">${item.Titulo || ''}</div><div style="font-size: 0.9em; color: var(--text-color); margin-top: 4px;">${item.Mensagem || ''}</div>`;
                 corpo.appendChild(div);
             });
+            corpo.innerHTML += gerarBotaoSugestao();
         }
         modal.style.display = "flex";
-    }
-
-    function filtrarGrupos() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
-        document.querySelectorAll('.materia-retratil').forEach(mat => {
-            let matches = 0;
-            mat.querySelectorAll('.grupo-detalhe').forEach(grp => {
-                const texto = grp.innerText.toLowerCase();
-                if(texto.includes(termo)) { grp.style.display = "block"; matches++; } else { grp.style.display = "none"; }
-            });
-            mat.style.display = matches > 0 ? "block" : "none";
-            if(termo.length > 0 && matches > 0) mat.open = true;
-        });
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
@@ -374,8 +330,5 @@
     });
 </script>
 
-<div class="footer-creditos">Desenvolvido por João Vitor Fróis Sanchez</div>
 </body>
 </html>
-
-
