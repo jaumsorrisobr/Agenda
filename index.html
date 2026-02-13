@@ -270,8 +270,6 @@
     document.getElementById('meuModal').style.display = 'flex';
 }
 
-// Função auxiliar para desenhar a lista (usada na abertura e na busca)
-// Função auxiliar para desenhar a lista (Corrigida para iniciar recolhida)
 function renderizarGrupos(lista) {
     const container = document.getElementById('container-grupos');
     const termoBusca = document.getElementById('inputBusca') ? document.getElementById('inputBusca').value : "";
@@ -288,29 +286,32 @@ function renderizarGrupos(lista) {
         const gruposMat = lista.filter(i => i["Matéria"] === mat);
         const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
         
+        // Se houver busca, as matérias e grupos expandem automaticamente
+        const statusOpen = termoBusca.length > 0 ? "open" : "";
+        
         let htmlGrupos = nomesG.map(ng => {
             const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng)
                 .map(m => `<li>${m["Integrantes"]}</li>`).join('');
             
-            // Se houver texto na busca, os grupos aparecem abertos (open), senão, fechados
-            const statusOpen = termoBusca.length > 0 ? "open" : "";
-
             return `
-                <details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;" ${statusOpen}>
-                    <summary style="padding:10px; font-weight:bold; color:var(--p-med);">${ng}</summary>
+                <details style="margin:5px 0; border:1px solid rgba(128,128,128,0.1); border-radius:8px;" ${statusOpen}>
+                    <summary style="padding:8px; font-size:0.9em; font-weight:bold; color:var(--text-color); opacity:0.8;">${ng}</summary>
                     <ul style="font-size:0.85em; color:#bbb; padding-bottom:10px; list-style-type: none; padding-left: 15px;">
                         ${membros}
                     </ul>
                 </details>`;
         }).join('');
 
+        // Matéria como o "Recolhimento Principal"
         container.innerHTML += `
-            <div class="secao-busca">
-                <div style="background:rgba(0,123,255,0.1); padding:8px 15px; border-radius:8px; margin-top:15px; font-size:0.8em; font-weight:bold; color:var(--p-med);">
-                    ${mat.toUpperCase()}
+            <details class="secao-retratil" ${statusOpen}>
+                <summary class="secao-titulo">
+                    ${mat.toUpperCase()} <span>▾</span>
+                </summary>
+                <div style="padding: 5px 10px;">
+                    ${htmlGrupos}
                 </div>
-                ${htmlGrupos}
-            </div>`;
+            </details>`;
     });
 }
 
@@ -390,5 +391,6 @@ function filtrarGrupos() {
 </script>
 </body>
 </html>
+
 
 
