@@ -78,6 +78,74 @@
         ul.lista-integrantes li { font-size: 0.85em; margin-bottom: 5px; word-break: break-word; } /* Permite que o nome quebre linha se for gigante */
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
+        /* ADICIONE ESTE CSS NO FINAL DO <style> */
+.admin-form input, .admin-form textarea {
+    width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+    border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color);
+}
+.btn-postar {
+    background: #28a745; color: white; border: none; padding: 15px;
+    border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;
+}
+
+/* ADICIONE ESTE HTML DENTRO DO <body> ANTES DO </body> */
+<div id="modalAdmin" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="fecharAdmin()">✕</button>
+        <h3 style="color:#28a745;">Painel do Representante</h3>
+        <div class="admin-form">
+            <input type="password" id="adminSenha" placeholder="Senha de Acesso">
+            <hr>
+            <input type="text" id="avisoTitulo" placeholder="Título (ex: Mudança de Sala)">
+            <textarea id="avisoTexto" rows="4" placeholder="Mensagem para a turma..."></textarea>
+            <button class="btn-postar" onclick="enviarAviso()">🚀 Postar Agora</button>
+        </div>
+        <p id="statusEnvio" style="text-align:center; font-size:0.8em; margin-top:10px;"></p>
+    </div>
+</div>
+
+/* ADICIONE ESTAS FUNÇÕES NO SEU <script> */
+let timerAdmin;
+const headerTitulo = document.querySelector('.header h2');
+
+// Detecta clique longo no título para abrir painel
+headerTitulo.addEventListener('mousedown', () => timerAdmin = setTimeout(abrirAdmin, 3000));
+headerTitulo.addEventListener('mouseup', () => clearTimeout(timerAdmin));
+headerTitulo.addEventListener('touchstart', () => timerAdmin = setTimeout(abrirAdmin, 3000));
+headerTitulo.addEventListener('touchend', () => clearTimeout(timerAdmin));
+
+function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
+function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
+
+async function enviarAviso() {
+    const senha = document.getElementById('adminSenha').value;
+    const titulo = document.getElementById('avisoTitulo').value;
+    const mensagem = document.getElementById('avisoTexto').value;
+    const status = document.getElementById('statusEnvio');
+
+    if(!titulo || !mensagem) return alert("Preencha tudo!");
+
+    status.innerText = "Enviando... ⏳";
+    
+    try {
+        const response = await fetch(URL_API, {
+            method: 'POST',
+            body: JSON.stringify({ senha, titulo, mensagem })
+        });
+        const resultado = await response.text();
+
+        if (resultado === "Sucesso") {
+            status.innerText = "✅ Postado com sucesso!";
+            status.style.color = "#28a745";
+            setTimeout(() => { fecharAdmin(); carregarDados(); }, 1500);
+        } else {
+            status.innerText = "❌ Senha incorreta!";
+            status.style.color = "#ff3b30";
+        }
+    } catch (e) {
+        status.innerText = "Erro na conexão.";
+    }
+}
     </style>
 </head>
 <body>
@@ -257,3 +325,4 @@
 </script>
 </body>
 </html>
+
