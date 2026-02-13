@@ -17,7 +17,6 @@
     <meta name="theme-color" content="#007bff">
 
     <style>
-        /* Mantenha o seu CSS original aqui debaixo... */
         :root { 
             --p-med: #007bff; 
             --bg: #f4f7f6; 
@@ -149,22 +148,25 @@
             const res = await fetch(URL_API);
             const novosDados = await res.json();
             
+            // Pega o que está salvo no celular ANTES de atualizar
             const cacheRaw = localStorage.getItem('cache_medicina');
             
             if (cacheRaw) {
                 const cacheAntigo = JSON.parse(cacheRaw);
                 
-                // Lógica de Notificação revisada
+                // Só compara se houver avisos no cache e no novo download
                 if (cacheAntigo.Avisos && cacheAntigo.Avisos.length > 0 && novosDados.Avisos && novosDados.Avisos.length > 0) {
-                    const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Titulo;
-                    const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1].Titulo;
+                    const ultimoTituloCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1].Titulo;
+                    const ultimoTituloNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Titulo;
 
-                    if (ultimoNovo && ultimoCache && ultimoNovo !== ultimoCache) {
+                    // A BOLINHA SÓ APARECE SE O TÍTULO MUDOU!
+                    if (ultimoTituloNovo !== ultimoTituloCache) {
                         document.getElementById('badge-avisos').style.display = 'block';
                     }
                 }
             }
 
+            // Atualiza os dados e o cache
             dadosApp = novosDados;
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
@@ -258,5 +260,3 @@
 </script>
 </body>
 </html>
-
-
