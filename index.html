@@ -3,57 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Agenda Medicina - Turma H</title>
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Medicina Turma H">
-    
     <link rel="apple-touch-icon" href="icon.png?v=2">
     <link rel="icon" type="image/png" sizes="192x192" href="icon.png?v=2">
     <link rel="manifest" href="manifest.json?v=2">
-    
     <meta name="theme-color" content="#007bff">
 
     <style>
         :root { --p-med: #007bff; --bg: #f4f7f6; --card-bg: #ffffff; --text-color: #333333; --header-bg: #ffffff; --shadow: rgba(0,0,0,0.1); }
         [data-theme="dark"] { --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --header-bg: #1e1e1e; --shadow: rgba(0,0,0,0.5); }
-
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 100px; }
-
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s; }
         .logo-animado { width: 180px; animation: pulsar 2s infinite; }
         @keyframes pulsar { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
         .header { background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px var(--shadow); margin-bottom: 20px; text-align: center; }
         #status-bar { font-size: 0.8em; margin-top: 5px; color: #888; }
         .status-online { color: #5cb85c; font-weight: bold; }
-
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { background: var(--card-bg); padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px var(--shadow); cursor: pointer; position: relative; font-weight: 600; transition: transform 0.1s; }
         .card:active { transform: scale(0.95); }
         .card span { display: block; font-size: 1.5em; margin-bottom: 8px; }
-
-        /* AJUSTE: Forçamos o display: none inicial no CSS */
-        .notification-badge {
-            position: absolute; top: 8px; right: 12px;
-            background: #ff3b30; color: white; font-size: 9px;
-            padding: 2px 6px; border-radius: 10px; 
-            display: none; 
-            animation: bounce 0.5s infinite alternate;
-            z-index: 10;
-        }
+        .notification-badge { position: absolute; top: 8px; right: 12px; background: #ff3b30; color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; display: none; animation: bounce 0.5s infinite alternate; z-index: 10; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; z-index: 2000; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 80%; overflow-y: auto; position: relative; }
-        .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); }
-
+        .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); cursor: pointer; }
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
         .aviso-titulo { font-weight: bold; color: var(--p-med); display: block; margin-bottom: 4px; }
-        
-        #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 15px var(--shadow); }
+        #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 15px var(--shadow); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -74,7 +54,7 @@
     <div class="card" onclick="mostrarAba('Grade')"><span>📅</span>Grade</div>
     <div class="card" onclick="mostrarAba('Grupos')"><span>👥</span>Grupos</div>
     <div class="card" onclick="abrirAvisos()">
-        <span id="badge-avisos" class="notification-badge" style="display: none;">NOVO</span>
+        <span id="badge-avisos" class="notification-badge">NOVO</span>
         <span>🔔</span>Avisos
     </div>
     <div class="card" onclick="mostrarAba('Links')"><span>📸</span>Fotos</div>
@@ -119,17 +99,11 @@
             const ultimoAvisoCeu = dadosApp.Avisos[dadosApp.Avisos.length - 1];
             const tituloCeu = (ultimoAvisoCeu.Titulo || ultimoAvisoCeu.Título || "").toString().trim();
             const ultimoLido = localStorage.getItem('ultimo_aviso_lido');
-
             if (tituloCeu === "") return;
-
-            // Se não tem nada salvo, salva agora e mantém escondido
             if (!ultimoLido) {
                 localStorage.setItem('ultimo_aviso_lido', tituloCeu);
-                document.getElementById('badge-avisos').style.display = 'none';
                 return;
             }
-
-            // Só mostra se for DIFERENTE. Se for igual, garante que está escondido.
             if (tituloCeu !== ultimoLido) {
                 document.getElementById('badge-avisos').style.display = 'block';
             } else {
@@ -153,61 +127,44 @@
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = nomeAba;
         corpo.innerHTML = "";
-        
         let itens = dadosApp[nomeAba] || [];
 
         if(itens.length === 0) {
             corpo.innerHTML = "<p>Nada cadastrado aqui ainda.</p>";
         } else {
-            // --- LÓGICA PARA A ABA DE GRUPOS ---
             if(nomeAba === "Grupos") {
                 const gruposAgrupados = {};
-                
                 itens.forEach(item => {
-                    const nomeG = item.Grupo || item.Nome_do_grupo;
-                    const integrante = item.Integrante || item.Nome;
+                    // AJUSTE: Usando os nomes exatos da sua planilha (conforme a foto)
+                    const nomeG = item["Nome do Grupo"]; 
+                    const integrante = item["Integrantes"];
                     if(nomeG) {
                         if(!gruposAgrupados[nomeG]) gruposAgrupados[nomeG] = [];
                         if(integrante) {
-                            // Formata o nome para Primeira Letra Maiúscula automaticamente
-                            const nomeFormatado = integrante.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-                            gruposAgrupados[nomeG].push(nomeFormatado);
+                            const nF = integrante.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+                            gruposAgrupados[nomeG].push(nF);
                         }
                     }
                 });
-
                 for (let nomeG in gruposAgrupados) {
                     const div = document.createElement('div');
                     div.className = 'aviso-item';
-                    const listaHTML = gruposAgrupados[nomeG].map(n => 
-                        `<li style="margin-bottom:3px; font-size:0.9em;">${n}</li>`
-                    ).join('');
-                    
-                    div.innerHTML = `
-                        <span class="aviso-titulo" style="color:var(--p-med); font-size:1.1em; border-bottom:1px solid var(--shadow); display:block; padding-bottom:5px;">${nomeG}</span>
-                        <ul style="margin:10px 0; padding-left:20px; text-align:left; list-style-type: circle;">${listaHTML}</ul>
-                    `;
+                    const listaHTML = gruposAgrupados[nomeG].map(n => `<li style="margin-bottom:3px; font-size:0.9em;">${n}</li>`).join('');
+                    div.innerHTML = `<span class="aviso-titulo" style="color:var(--p-med); border-bottom:1px solid var(--shadow); padding-bottom:5px;">${nomeG}</span><ul style="margin:10px 0; padding-left:20px; text-align:left; list-style-type: circle;">${listaHTML}</ul>`;
                     corpo.appendChild(div);
                 }
-            } 
-            // --- LÓGICA PARA AS DEMAIS ABAS (AVISOS, GRADE, ETC) ---
-            else {
-                const itensInvertidos = [...itens].reverse();
-                itensInvertidos.forEach(item => {
+            } else {
+                const invertidos = [...itens].reverse();
+                invertidos.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'aviso-item';
-                    
                     if(nomeAba === "Avisos") {
-                        let dataF = "";
+                        let dF = "";
                         if (item.Data) {
                             const d = new Date(item.Data);
-                            dataF = !isNaN(d.getTime()) ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}` : item.Data;
+                            dF = !isNaN(d.getTime()) ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}` : item.Data;
                         }
-                        div.innerHTML = `
-                            <small style="color:#888; display:block; margin-bottom:2px;">${dataF}</small>
-                            <span class="aviso-titulo" style="font-size:1.1em;">${item.Titulo || item.Título || 'Aviso'}</span>
-                            <div style="font-size:0.95em; line-height:1.4; margin-top:5px;">${item.Mensagem || ''}</div>
-                        `;
+                        div.innerHTML = `<small style="color:#888; display:block;">${dF}</small><span class="aviso-titulo">${item.Titulo || item.Título || 'Aviso'}</span><div style="font-size:0.95em;">${item.Mensagem || ''}</div>`;
                     } else if(nomeAba === "Grade") {
                         div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small>${item.Horário || ''} - ${item.Sala || ''}</small>`;
                     } else {
@@ -226,12 +183,10 @@
         const html = document.documentElement;
         const icon = document.getElementById('theme-icon');
         if (html.getAttribute('data-theme') === 'dark') {
-            html.removeAttribute('data-theme');
-            icon.innerText = '💡';
+            html.removeAttribute('data-theme'); icon.innerText = '💡';
             localStorage.setItem('theme', 'light');
         } else {
-            html.setAttribute('data-theme', 'dark');
-            icon.innerText = '🌙';
+            html.setAttribute('data-theme', 'dark'); icon.innerText = '🌙';
             localStorage.setItem('theme', 'dark');
         }
     }
@@ -253,7 +208,3 @@
 </script>
 </body>
 </html>
-
-
-
-
