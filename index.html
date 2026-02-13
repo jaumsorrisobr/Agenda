@@ -15,7 +15,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 60px; }
 
-        /* Splash e Logo */
+        /* Splash */
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s ease; }
         .logo-pulsando { width: 120px; animation: pulsar 2s infinite ease-in-out; }
         @keyframes pulsar { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
@@ -23,7 +23,7 @@
         .header { text-align: center; margin-bottom: 20px; }
         #status-bar { font-size: 0.8em; color: #888; margin-top: 5px; }
         
-        /* Grid Principal */
+        /* Grid */
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { background: var(--card-bg); height: 110px; border-radius: 15px; box-shadow: 0 4px 6px var(--shadow); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600; border: 1px solid rgba(255,255,255,0.05); }
         .card .icon { font-size: 1.8em; margin-bottom: 8px; }
@@ -33,13 +33,16 @@
         .modal-content { background: var(--card-bg); padding: 20px; border-radius: 25px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.3); }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 28px; color: var(--text-color); }
         
-        /* Grade e Listas */
+        /* Estilos de Lista e Grade */
         .secao-retratil { margin-bottom: 12px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--shadow); overflow: hidden; }
-        .secao-titulo { background: rgba(0,123,255,0.12); color: var(--p-med); padding: 14px 18px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+        .secao-titulo { background: rgba(0,123,255,0.12); color: var(--p-med); padding: 14px 18px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 
-        .grade-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
-        .grade-hora { flex: 0 0 65px; color: var(--p-med); font-weight: 800; font-size: 0.85em; text-align: center; background: rgba(0,123,255,0.1); padding: 4px; border-radius: 6px; }
-        .grade-nome { font-weight: bold; font-size: 0.95em; display: block; }
+        .grade-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .grade-item:last-child { border-bottom: none; }
+        .grade-hora { flex: 0 0 70px; color: #fff; font-weight: 800; font-size: 0.8em; text-align: center; background: var(--p-med); padding: 5px; border-radius: 6px; }
+        .grade-info { flex: 1; }
+        .grade-nome { font-weight: bold; font-size: 0.95em; display: block; color: var(--text-color); }
+        .grade-grupo { font-size: 0.75em; opacity: 0.6; }
 
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); }
         .search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--p-med); background: var(--input-bg); color: var(--text-color); margin-bottom: 15px; }
@@ -82,9 +85,8 @@
 <div id="modalAdmin" class="modal">
     <div class="modal-content">
         <button class="close-btn" onclick="fecharAdmin()">✕</button>
-        <h3 style="color:#28a745;">Painel do Representante</h3>
-        <p>Acesso Identificado: <b>João Sanchez</b></p>
-        <p style="font-size: 0.85em; opacity: 0.7;">Painel de gestão da Turma H.</p>
+        <h3 style="color:#28a745;">Painel Administrativo</h3>
+        <p>Acesso: <b>João Sanchez</b></p>
     </div>
 </div>
 
@@ -97,13 +99,11 @@
     let dadosApp = {};
     let timerAdmin;
 
-    // --- ADMIN (Segurar 5 seg) ---
     const btnAdmin = document.getElementById('btnAdmin');
     ['touchstart', 'mousedown'].forEach(evt => btnAdmin.addEventListener(evt, () => timerAdmin = setTimeout(() => document.getElementById('modalAdmin').style.display='flex', 5000)));
     ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAdmin.addEventListener(evt, () => clearTimeout(timerAdmin)));
     function fecharAdmin() { document.getElementById('modalAdmin').style.display = 'none'; }
 
-    // --- CARREGAR DADOS ---
     async function carregarDados() {
         try {
             const res = await fetch(`${URL_API}?t=${new Date().getTime()}`);
@@ -112,42 +112,56 @@
             document.getElementById('status-bar').innerText = `Atualizado: ${dadosApp.ultima_sincronizacao || 'Agora'}`;
         } catch (e) {
             dadosApp = JSON.parse(localStorage.getItem('med_h_cache') || "{}");
-            document.getElementById('status-bar').innerText = "Offline";
+            document.getElementById('status-bar').innerText = "Modo Offline";
         }
     }
 
-    // --- GRADE ---
+    // --- GRADE ORGANIZADA POR DIA ---
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Grade Semanal";
+        document.getElementById('modal-titulo').innerText = "Grade de Aulas";
         corpo.innerHTML = "";
-        const ordem = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+        
+        const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
         const itens = dadosApp["Grade"] || [];
         
-        ordem.forEach(dia => {
-            const aulas = itens.filter(a => String(a["Dia da Semana"]).trim() === dia);
+        diasSemana.forEach(dia => {
+            // Filtro inteligente (ignora espaços e maiúsculas)
+            const aulas = itens.filter(a => {
+                const diaPlanilha = String(a["Dia da Semana"] || "").trim().toLowerCase();
+                return diaPlanilha === dia.toLowerCase();
+            });
+
             if(aulas.length > 0) {
-                let html = aulas.map(a => `
+                let htmlAulas = aulas.map(a => `
                     <div class="grade-item">
                         <div class="grade-hora">${a["Horários"] || '--:--'}</div>
-                        <div>
+                        <div class="grade-info">
                             <span class="grade-nome">${a["Matéria"]}</span>
-                            <small style="opacity:0.6; font-size:0.75em;">${a["Grupo"] || 'Turma H'}</small>
+                            <span class="grade-grupo">👥 ${a["Grupo"] || 'Geral'}</span>
                         </div>
                     </div>
                 `).join('');
-                corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${dia} ▾</summary><div style="padding:5px 15px;">${html}</div></details>`;
+
+                corpo.innerHTML += `
+                    <details class="secao-retratil">
+                        <summary class="secao-titulo">${dia} <span>▾</span></summary>
+                        <div>${htmlAulas}</div>
+                    </details>`;
             }
         });
+
+        if(!corpo.innerHTML) corpo.innerHTML = "<p style='text-align:center; opacity:0.5;'>Nenhuma aula encontrada.</p>";
         document.getElementById('meuModal').style.display = 'flex';
     }
 
-    // --- GRUPOS ---
+    // --- GRUPOS COM PESQUISA ---
     function abrirGrupos() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Grupos";
-        corpo.innerHTML = `<input type="text" class="search-box" id="inputBusca" placeholder="🔍 Buscar aluno ou grupo..." onkeyup="filtrarGrupos()">
-                           <div id="container-grupos"></div>`;
+        document.getElementById('modal-titulo').innerText = "Grupos e Integrantes";
+        corpo.innerHTML = `
+            <input type="text" class="search-box" id="inputBusca" placeholder="🔍 Buscar aluno ou grupo..." onkeyup="filtrarGrupos()">
+            <div id="container-grupos"></div>`;
         renderizarGrupos(dadosApp["Grupos"] || []);
         document.getElementById('meuModal').style.display = 'flex';
     }
@@ -156,39 +170,52 @@
         const container = document.getElementById('container-grupos');
         container.innerHTML = "";
         const materias = [...new Set(lista.map(i => i["Matéria"]))];
+
         materias.forEach(mat => {
             const gruposMat = lista.filter(i => i["Matéria"] === mat);
             const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
-            let html = nomesG.map(ng => {
+            
+            let htmlGrupos = nomesG.map(ng => {
                 const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;"><summary style="padding:10px; cursor:pointer; font-size:0.9em;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul></details>`;
+                return `
+                    <details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;">
+                        <summary style="padding:10px; cursor:pointer; font-size:0.9em;">${ng}</summary>
+                        <ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul>
+                    </details>`;
             }).join('');
-            container.innerHTML += `<details class="secao-retratil" open><summary class="secao-titulo">${mat} ▾</summary><div style="padding:10px;">${html}</div></details>`;
+
+            container.innerHTML += `
+                <details class="secao-retratil" open>
+                    <summary class="secao-titulo">${mat} <span>▾</span></summary>
+                    <div style="padding:10px;">${htmlGrupos}</div>
+                </details>`;
         });
     }
 
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
-        const filtrados = dadosApp["Grupos"].filter(g => g["Integrantes"].toLowerCase().includes(termo) || g["Nome do Grupo"].toLowerCase().includes(termo));
+        const filtrados = (dadosApp["Grupos"] || []).filter(g => 
+            String(g["Integrantes"]).toLowerCase().includes(termo) || 
+            String(g["Nome do Grupo"]).toLowerCase().includes(termo)
+        );
         renderizarGrupos(filtrados);
     }
 
-    // --- ARQUIVOS ---
+    // --- OUTRAS FUNÇÕES ---
     function abrirArquivos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Arquivos";
         corpo.innerHTML = "";
         const itens = dadosApp["Arquivos"] || [];
-        const cats = [...new Set(itens.map(i => i["Nome"]))];
-        cats.forEach(c => {
-            const arqs = itens.filter(i => i["Nome"] === c);
-            let html = arqs.map(a => `<a href="${a["Links"]}" target="_blank" class="item-lista"><b>${a["Descrição"]}</b><span>🔗</span></a>`).join('');
-            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${c} ▾</summary><div style="padding:5px 10px;">${html}</div></details>`;
+        const nomes = [...new Set(itens.map(i => i["Nome"]))];
+        nomes.forEach(n => {
+            const links = itens.filter(i => i["Nome"] === n);
+            let html = links.map(l => `<a href="${l["Links"]}" target="_blank" class="item-lista"><b>${l["Descrição"]}</b><span>🔗</span></a>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${n} ▾</summary><div style="padding:5px 10px;">${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
     }
 
-    // --- AVISOS ---
     function abrirAvisos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Avisos";
@@ -203,16 +230,15 @@
         document.getElementById('meuModal').style.display = 'flex';
     }
 
-    // --- LINKS ---
     function abrirLinks() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Links / Aulas";
+        document.getElementById('modal-titulo').innerText = "Aulas Online";
         const itens = dadosApp["Links"] || [];
         corpo.innerHTML = itens.map(i => `
             <div class="item-lista" style="flex-direction:column; align-items:flex-start;">
                 <b style="color:var(--p-med);">${i["Materia"]}</b>
                 <small>🗓️ ${i["Data"]} às ${i["Horário"]}</small>
-                <a href="${i["Url"]}" target="_blank" style="background:#28a745; color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ACESSAR AULA</a>
+                <a href="${i["Url"]}" target="_blank" style="background:#28a745; color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ABRIR LINK</a>
             </div>
         `).join('');
         document.getElementById('meuModal').style.display = 'flex';
@@ -229,12 +255,11 @@
     window.onload = () => {
         const t = localStorage.getItem('med_h_theme') || 'dark';
         document.body.setAttribute('data-theme', t);
-        document.getElementById('theme-icon').innerText = t === 'dark' ? '🌙' : '💡';
         carregarDados();
         setTimeout(() => { 
             const s = document.getElementById('splash');
             if(s) { s.style.opacity = '0'; setTimeout(() => s.style.display = 'none', 800); }
-        }, 2000);
+        }, 1800);
     };
 </script>
 </body>
