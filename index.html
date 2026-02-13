@@ -226,15 +226,25 @@
     }
 
     async function carregarDados() {
+        const msgOffline = document.getElementById('offline-pwa-msg');
         try {
             const res = await fetch(URL_API);
             dadosApp = await res.json();
+            
+            // Se chegou aqui, a internet está OK
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             document.getElementById('status-bar').innerHTML = `<span style="color:#5cb85c; font-weight:bold">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
+            if(msgOffline) msgOffline.style.display = 'none'; // Esconde o aviso se a internet voltou
+            
             verificarNovosAvisos();
         } catch (e) {
+            // Se caiu no erro (sem internet), tenta carregar o que está salvo
             const cache = localStorage.getItem('cache_medicina');
-            if(cache) dadosApp = JSON.parse(cache);
+            if(cache) {
+                dadosApp = JSON.parse(cache);
+                if(msgOffline) msgOffline.style.display = 'block'; // Mostra o aviso laranja
+                document.getElementById('status-bar').innerHTML = `<span style="color:#888;">Exibindo versão offline</span>`;
+            }
         }
     }
 
@@ -412,6 +422,7 @@
 </script>
 </body>
 </html>
+
 
 
 
