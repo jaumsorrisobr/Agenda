@@ -33,22 +33,19 @@
         .modal-content { background: var(--card-bg); padding: 20px; border-radius: 25px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.3); }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 28px; color: var(--text-color); }
         
-        /* Estilos de Lista e Grade */
+        /* Listas e Grade */
         .secao-retratil { margin-bottom: 12px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--shadow); overflow: hidden; }
         .secao-titulo { background: rgba(0,123,255,0.12); color: var(--p-med); padding: 14px 18px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
         .secao-titulo::-webkit-details-marker { display: none; }
 
         .grade-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid rgba(128,128,128,0.1); }
-        .grade-hora { flex: 0 0 110px; color: #fff; font-weight: 800; font-size: 0.75em; text-align: center; background: var(--p-med); padding: 5px; border-radius: 6px; }
+        .grade-hora { flex: 0 0 100px; color: #fff; font-weight: 800; font-size: 0.75em; text-align: center; background: var(--p-med); padding: 5px; border-radius: 6px; }
         .grade-info { flex: 1; text-align: left; }
-        .grade-nome { font-weight: bold; font-size: 0.95em; display: block; }
         
-        /* Arquivos */
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); }
-        .arquivo-nome { font-weight: bold; text-align: left; flex: 1; }
-        .link-vazio { color: #ffa500; font-size: 0.75em; font-style: italic; margin-left: 10px; }
-        
-        .search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--p-med); background: var(--input-bg); color: var(--text-color); margin-bottom: 15px; }
+        /* Fix para Nome na Esquerda */
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); width: 100%; }
+        .arquivo-nome { font-weight: bold; text-align: left; flex: 1; margin-right: 10px; }
+        .link-vazio { color: #ffa500; font-size: 0.75em; font-style: italic; white-space: nowrap; }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
     </style>
@@ -102,23 +99,21 @@
     let dadosApp = {};
     let timerAdmin;
 
-    // Função para fechar outros detalhes (Efeito Sanfona Manual para iPhone)
     function setupAccordion(grupo) {
         const detalhes = document.querySelectorAll(`details[name="${grupo}"]`);
         detalhes.forEach(targetDetail => {
-            targetDetail.addEventListener("click", () => {
+            targetDetail.onclick = (e) => {
                 detalhes.forEach(detail => {
                     if (detail !== targetDetail) detail.removeAttribute("open");
                 });
-            });
+            };
         });
     }
 
-    // Formata Data para DD/MM/AAAA
     function formatarDataBR(dataStr) {
         if(!dataStr) return "";
         const d = new Date(dataStr);
-        if(isNaN(d.getTime())) return dataStr; // Se não for data válida, retorna o texto original
+        if(isNaN(d.getTime())) return dataStr;
         return d.toLocaleDateString('pt-BR');
     }
 
@@ -155,8 +150,8 @@
                 <div class="grade-item">
                     <div class="grade-hora">${a["Horários"] || '--:--'}</div>
                     <div class="grade-info">
-                        <span class="grade-nome">${a["Matéria"]}</span>
-                        <span class="grade-grupo" style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span>
+                        <span style="font-weight:bold; font-size:0.95em; display:block;">${a["Matéria"]}</span>
+                        <span style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span>
                     </div>
                 </div>`).join('');
             corpo.innerHTML += `<details class="secao-retratil" name="grade">
@@ -230,14 +225,48 @@
 
     function abrirLinks() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Aulas Online";
+        document.getElementById('modal-titulo').innerText = "Portal de Aulas Online";
         const itens = dadosApp["Links"] || [];
-        corpo.innerHTML = itens.map(i => `
-            <div class="item-lista" style="flex-direction:column; align-items:flex-start;">
-                <b style="color:var(--p-med);">${i["Materia"]}</b>
-                <small>🗓️ ${i["Data"]} às ${i["Horário"]}</small>
-                <a href="${i["Url"]}" target="_blank" style="background:#28a745; color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ABRIR LINK</a>
-            </div>`).join('');
+        
+        if (itens.length === 0) {
+            corpo.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Nenhum link agendado.</p>";
+        } else {
+            corpo.innerHTML = itens.map(i => {
+                const agora = new Date();
+                const [dia, mes, ano] = i["Data"].split('/');
+                const [hora, minuto] = i["Horário"].split(':');
+                const dataAula = new Date(ano, mes - 1, dia, hora, minuto);
+                
+                let statusHtml = "";
+                let btnCor = "#6c757d"; 
+                let textoBtn = "LINK INDISPONÍVEL";
+
+                if (agora >= dataAula) {
+                    statusHtml = '<span style="color:#28a745; font-size:0.7em;">● AO VIVO</span>';
+                    btnCor = "#28a745";
+                    textoBtn = "ACESSAR AULA AGORA";
+                } else {
+                    statusHtml = `<span style="color:#ffa500; font-size:0.7em;">⌛ AGENDADA</span>`;
+                    btnCor = "#007bff";
+                    textoBtn = "ABRIR LINK";
+                }
+
+                return `
+                    <div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                            <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"]}</b>
+                            ${statusHtml}
+                        </div>
+                        <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">
+                            🗓️ ${i["Data"]} | ⏰ ${i["Horário"]}
+                        </div>
+                        <a href="${i["Url"]}" target="_blank" 
+                           style="background:${btnCor}; color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px; display:block;">
+                           ${textoBtn}
+                        </a>
+                    </div>`;
+            }).join('');
+        }
         document.getElementById('meuModal').style.display = 'flex';
     }
 
