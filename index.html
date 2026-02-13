@@ -212,41 +212,44 @@
             corpo.innerHTML = itens.map(i => {
                 const agora = new Date();
                 
-                // 1. Limpeza dos dados vindos da planilha
-                // Remove espaços extras e garante que o horário tenha formato HH:MM
-                const strData = String(i["Data"]).split('T')[0]; // Pega apenas a parte da data YYYY-MM-DD
-                const strHora = String(i["Horário"]).trim();
-                
+                // 1. TRATAMENTO SEGURO DA DATA E HORA
                 let dataAula;
+                
+                try {
+                    // Tenta converter o que vier (seja objeto, ISO string ou texto)
+                    let dataBruta = i["Data"];
+                    let horaBruta = String(i["Horário"] || "00:00").trim();
 
-                // 2. Tenta montar a data combinando os dois campos
-                if (strData.includes('/') && strHora.includes(':')) {
-                    // Formato DD/MM/AAAA + HH:MM
-                    const [dia, mes, ano] = strData.split('/');
-                    const [hora, minuto] = strHora.split(':');
-                    dataAula = new Date(ano, mes - 1, dia, hora, minuto);
-                } else if (strData.includes('-') && strHora.includes(':')) {
-                    // Formato AAAA-MM-DD (Padrão Google) + HH:MM
-                    const [ano, mes, dia] = strData.split('-');
-                    const [hora, minuto] = strHora.split(':');
-                    dataAula = new Date(ano, mes - 1, dia, hora, minuto);
-                } else {
-                    // Fallback para qualquer outro formato
-                    dataAula = new Date(i["Data"]);
+                    // Se a data vier como ISO (Ex: 2026-02-13T03:00:00.000Z)
+                    if (String(dataBruta).includes('T')) {
+                        dataAula = new Date(dataBruta);
+                        // Ajusta o horário com o que está na coluna Horário
+                        const [h, m] = horaBruta.split(':');
+                        dataAula.setHours(parseInt(h), parseInt(m), 0);
+                    } 
+                    // Se vier como texto DD/MM/AAAA
+                    else if (String(dataBruta).includes('/')) {
+                        const [d, mes, a] = String(dataBruta).split('/');
+                        const [h, m] = horaBruta.split(':');
+                        dataAula = new Date(a, mes - 1, d, h, m);
+                    }
+                    else {
+                        dataAula = new Date(dataBruta);
+                    }
+                } catch (e) {
+                    dataAula = new Date(); // Fallback para não travar
                 }
 
-                // 3. Formatação para exibição amigável
-                const d = dataAula.getDate().toString().padStart(2, '0');
-                const m = (dataAula.getMonth() + 1).toString().padStart(2, '0');
-                const a = dataAula.getFullYear();
-                const hh = dataAula.getHours().toString().padStart(2, '0');
-                const mm = dataAula.getMinutes().toString().padStart(2, '0');
-                
-                const exibicaoCompleta = `${d}/${m}/${a} - ${hh}:${mm}`;
+                // Se mesmo assim falhou (NaN), evita o erro visual
+                if (isNaN(dataAula.getTime())) dataAula = new Date();
+
+                // 2. FORMATAÇÃO PARA EXIBIÇÃO
+                const exibicaoCompleta = dataAula.toLocaleDateString('pt-BR') + " - " + 
+                                       dataAula.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
                 let statusHtml = "", btnCor = "#6c757d", textoBtn = "LINK INDISPONÍVEL";
 
-                // 4. Lógica de Status baseada no horário real
+                // 3. LÓGICA DE STATUS
                 if (agora >= dataAula) {
                     statusHtml = '<span style="color:#28a745; font-size:0.7em; font-weight:bold;">● AO VIVO</span>';
                     btnCor = "#28a745"; 
@@ -259,7 +262,7 @@
 
                 return `<div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
                     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                        <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"]}</b>
+                        <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"] || "Aula"}</b>
                         ${statusHtml}
                     </div>
                     <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">
@@ -271,6 +274,7 @@
         }
         document.getElementById('meuModal').style.display = 'flex';
     }
+    
     function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
 
     function toggleTheme() {
@@ -305,5 +309,6 @@
 </script>
 </body>
 </html>
+
 
 
