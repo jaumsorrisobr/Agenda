@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Medicina - Turma H</title>
+    <title>Agenda Medicine - Turma H</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,27 +12,38 @@
     <meta name="theme-color" content="#007bff">
 
     <style>
-        /* Indicador visual de carregamento no topo */
-#refresh-indicator {
-    position: fixed;
-    top: -50px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--p-med);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: bold;
-    z-index: 10001;
-    transition: top 0.3s ease;
-    box-shadow: 0 4px 10px var(--shadow);
-}
         :root { --p-med: #007bff; --bg: #f4f7f6; --card-bg: #ffffff; --text-color: #333333; --header-bg: #ffffff; --shadow: rgba(0,0,0,0.1); --input-bg: #eeeeee; }
         [data-theme="dark"] { --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --header-bg: #1e1e1e; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 100px; }
+        
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-color); 
+            transition: background 0.3s; 
+            padding-bottom: 100px;
+            /* BLOQUEIA O REFRESH NATIVO DO ANDROID */
+            overscroll-behavior-y: contain; 
+        }
+
+        #refresh-indicator {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--p-med);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10001;
+            transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
         
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s; }
         .logo-animado { width: 180px; animation: pulsar 2s infinite; }
@@ -66,13 +77,13 @@
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
 
-        /* Estilos do Painel Admin */
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); font-family: inherit; }
         .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         #statusEnvio { text-align: center; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
     </style>
 </head>
 <body>
+
 <div id="refresh-indicator">🔄 Atualizando...</div>
 <button id="theme-toggle" onclick="toggleTheme()"><span id="theme-icon">💡</span></button>
 
@@ -120,62 +131,71 @@
 </div>
 
 <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec"; // <--- COLOQUE SUA URL AQUI
+    const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec"; 
     let dadosApp = {};
     let timerAdmin;
 
-    // Lógica para abrir área administrativa (Clique longo de 3 segundos no título)
+    // --- LÓGICA DE ATUALIZAÇÃO (PULL-TO-REFRESH) CORRIGIDA ---
+    let touchStart = 0;
+    let touchEnd = 0;
+    const indicator = document.getElementById('refresh-indicator');
+
+    window.addEventListener('touchstart', (e) => {
+        touchStart = e.targetTouches[0].pageY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        touchEnd = e.targetTouches[0].pageY;
+        const distance = touchEnd - touchStart;
+
+        // Se estiver no topo e puxar para baixo
+        if (window.scrollY <= 0 && distance > 0) {
+            if (distance > 80) {
+                indicator.style.top = '20px';
+            }
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', async () => {
+        const distance = touchEnd - touchStart;
+        if (window.scrollY <= 0 && distance > 80) {
+            indicator.innerText = "🔄 Atualizando...";
+            await carregarDados();
+            indicator.innerText = "✅ Atualizado!";
+            setTimeout(() => {
+                indicator.style.top = '-60px';
+            }, 1000);
+        }
+        touchStart = 0;
+        touchEnd = 0;
+    });
+
+    // --- RESTANTE DAS FUNÇÕES ---
+
     const tituloHeader = document.getElementById('tituloPrincipal');
-    tituloHeader.addEventListener('touchstart', (e) => {
-    // e.preventDefault(); // Opcional: ativa isso se ainda estiver selecionando texto
-    timerAdmin = setTimeout(abrirAdmin, 5000);
-});
+    tituloHeader.addEventListener('touchstart', () => timerAdmin = setTimeout(abrirAdmin, 5000));
     tituloHeader.addEventListener('touchend', () => clearTimeout(timerAdmin));
     tituloHeader.addEventListener('mousedown', () => timerAdmin = setTimeout(abrirAdmin, 5000));
     tituloHeader.addEventListener('mouseup', () => clearTimeout(timerAdmin));
 
     function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
-    function fecharAdmin() { 
-        document.getElementById('modalAdmin').style.display = "none";
-        document.getElementById('statusEnvio').innerText = "";
-    }
+    function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
 
     async function enviarAviso() {
         const senha = document.getElementById('adminSenha').value;
         const titulo = document.getElementById('avisoTitulo').value;
         const mensagem = document.getElementById('avisoTexto').value;
         const status = document.getElementById('statusEnvio');
-
-        if(!senha || !titulo || !mensagem) {
-            status.innerText = "⚠️ Preencha todos os campos!";
-            status.style.color = "#eead2d";
-            return;
-        }
-
+        if(!senha || !titulo || !mensagem) { status.innerText = "⚠️ Preencha tudo!"; return; }
         status.innerText = "Enviando... ⏳";
-        status.style.color = "inherit";
-        
         try {
-            const response = await fetch(URL_API, {
-                method: 'POST',
-                body: JSON.stringify({ senha, titulo, mensagem })
-            });
+            const response = await fetch(URL_API, { method: 'POST', body: JSON.stringify({ senha, titulo, mensagem }) });
             const resultado = await response.text();
-
             if (resultado === "Sucesso") {
-                status.innerText = "✅ Postado com sucesso!";
-                status.style.color = "#28a745";
-                document.getElementById('avisoTitulo').value = "";
-                document.getElementById('avisoTexto').value = "";
+                status.innerText = "✅ Postado!";
                 setTimeout(() => { fecharAdmin(); carregarDados(); }, 2000);
-            } else {
-                status.innerText = "❌ Senha incorreta!";
-                status.style.color = "#ff3b30";
-            }
-        } catch (e) {
-            status.innerText = "❌ Erro de conexão!";
-            status.style.color = "#ff3b30";
-        }
+            } else { status.innerText = "❌ Senha incorreta!"; }
+        } catch (e) { status.innerText = "❌ Erro!"; }
     }
 
     function formatarNome(texto) {
@@ -232,7 +252,6 @@
                 if(!estrutura[mat][grp]) estrutura[mat][grp] = [];
                 if(item["Integrantes"]) estrutura[mat][grp].push(formatarNome(item["Integrantes"]));
             });
-
             for (let mat in estrutura) {
                 const matDet = document.createElement('details');
                 matDet.className = 'materia-retratil';
@@ -249,9 +268,7 @@
         } else {
             itens.slice().reverse().forEach(item => {
                 const div = document.createElement('div');
-                div.style.padding = "15px 0"; 
-                div.style.borderBottom = "1px solid var(--shadow)";
-                
+                div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
                 if(nomeAba === "Avisos") {
                     let dataFormatada = "";
                     if (item.Data) {
@@ -259,13 +276,10 @@
                         if (d.includes("T")) {
                             let partes = d.split("T")[0].split("-");
                             dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                        } else {
-                            dataFormatada = d.substring(0, 10);
-                        }
+                        } else { dataFormatada = d.substring(0, 10); }
                     }
                     div.innerHTML = `<small style="color:#888">${dataFormatada}</small><br><b style="color:var(--p-med)">${item.Titulo || 'Aviso'}</b><p style="margin:5px 0; font-size:0.9em">${item.Mensagem || ''}</p>`;
                 } else {
-                    // Aqui é onde Grade, Arquivos, etc. são montados
                     div.innerHTML = `<b>${item.Matéria || item.Nome || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || ''}</small>`;
                 }
                 corpo.appendChild(div);
@@ -273,62 +287,18 @@
         }
         modal.style.display = "flex";
     }
-    let touchStart = 0;
-let touchEnd = 0;
-const indicator = document.getElementById('refresh-indicator');
 
-// Detecta o início do toque
-window.addEventListener('touchstart', (e) => {
-    touchStart = e.targetTouches[0].pageY;
-}, { passive: true });
-
-// Detecta o movimento
-window.addEventListener('touchmove', (e) => {
-    touchEnd = e.targetTouches[0].pageY;
-    const distance = touchEnd - touchStart;
-
-    // Se estiver no topo da página e puxar para baixo mais de 70px
-    if (window.scrollY === 0 && distance > 70) {
-        indicator.style.top = '20px';
-    }
-}, { passive: true });
-
-// Detecta quando solta o dedo
-window.addEventListener('touchend', async () => {
-    const distance = touchEnd - touchStart;
-
-    if (window.scrollY === 0 && distance > 70) {
-        // Dispara a atualização dos dados
-        await carregarDados();
-        
-        // Feedback visual de sucesso
-        indicator.innerText = "✅ Atualizado!";
-        setTimeout(() => {
-            indicator.style.top = '-50px';
-            setTimeout(() => { indicator.innerText = "🔄 Atualizando..."; }, 300);
-        }, 1000);
-    }
-    
-    // Reseta as variáveis
-    touchStart = 0;
-    touchEnd = 0;
-});
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
         const itens = document.querySelectorAll('.grupo-detalhe');
-        
         itens.forEach(item => {
             const texto = item.innerText.toLowerCase();
             item.style.display = texto.includes(termo) ? "block" : "none";
-            
-            // Se estiver filtrando, abre o grupo automaticamente para mostrar o resultado
-            if(termo.length > 0 && texto.includes(termo)) {
-                item.open = true;
-            } else if (termo.length === 0) {
-                item.open = false;
-            }
+            if(termo.length > 0 && texto.includes(termo)) item.open = true;
+            else if (termo.length === 0) item.open = false;
         });
     }
+
     function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
     
     function toggleTheme() {
@@ -352,7 +322,3 @@ window.addEventListener('touchend', async () => {
 </script>
 </body>
 </html>
-
-
-
-
