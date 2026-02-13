@@ -42,7 +42,6 @@
         .grade-hora { flex: 0 0 100px; color: #fff; font-weight: 800; font-size: 0.75em; text-align: center; background: var(--p-med); padding: 5px; border-radius: 6px; }
         .grade-info { flex: 1; text-align: left; }
         
-        /* Fix para Nome na Esquerda */
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); width: 100%; }
         .arquivo-nome { font-weight: bold; text-align: left; flex: 1; margin-right: 10px; }
         .link-vazio { color: #ffa500; font-size: 0.75em; font-style: italic; white-space: nowrap; }
@@ -69,7 +68,7 @@
     <div class="card" onclick="abrirGrupos()"><span class="icon">👥</span><span>Grupos</span></div>
     <div class="card" onclick="abrirAvisos()"><span class="icon">🔔</span><span>Avisos</span></div>
     <div class="card" onclick="abrirArquivos()"><span class="icon">📄</span><span>Arquivos</span></div>
-    <div class="card" onclick="abrirLinks()" style="grid-column: span 2; height: 85px; flex-direction: row; gap: 15px;">
+    <div id="btnAulasOnline" class="card" onclick="abrirLinks()" style="grid-column: span 2; height: 85px; flex-direction: row; gap: 15px;">
         <span class="icon">💻</span><span>Aulas Online</span>
     </div>
 </div>
@@ -98,6 +97,7 @@
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec";
     let dadosApp = {};
     let timerAdmin;
+    let timerPlanilha; // Variável global para o timer
 
     function setupAccordion(grupo) {
         const detalhes = document.querySelectorAll(`details[name="${grupo}"]`);
@@ -117,9 +117,11 @@
         return d.toLocaleDateString('pt-BR');
     }
 
-    const btnAdmin = document.getElementById('btnAdmin');
-    ['touchstart', 'mousedown'].forEach(evt => btnAdmin.addEventListener(evt, () => timerAdmin = setTimeout(() => document.getElementById('modalAdmin').style.display='flex', 5000)));
-    ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAdmin.addEventListener(evt, () => clearTimeout(timerAdmin)));
+    // Configuração Admin do Footer
+    const btnAdminDiv = document.getElementById('btnAdmin');
+    ['touchstart', 'mousedown'].forEach(evt => btnAdminDiv.addEventListener(evt, () => timerAdmin = setTimeout(() => document.getElementById('modalAdmin').style.display='flex', 5000)));
+    ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAdminDiv.addEventListener(evt, () => clearTimeout(timerAdmin)));
+    
     function fecharAdmin() { document.getElementById('modalAdmin').style.display = 'none'; }
 
     async function carregarDados() {
@@ -134,6 +136,7 @@
         }
     }
 
+    // Funções de Modal (Grade, Avisos, etc - Mesma lógica)
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
@@ -143,21 +146,10 @@
         const diasDaPlanilha = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a, b) => {
             return ordemReferencia.findIndex(dia => a.includes(dia)) - ordemReferencia.findIndex(dia => b.includes(dia));
         });
-
         diasDaPlanilha.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia);
-            let htmlAulas = aulas.map(a => `
-                <div class="grade-item">
-                    <div class="grade-hora">${a["Horários"] || '--:--'}</div>
-                    <div class="grade-info">
-                        <span style="font-weight:bold; font-size:0.95em; display:block;">${a["Matéria"]}</span>
-                        <span style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span>
-                    </div>
-                </div>`).join('');
-            corpo.innerHTML += `<details class="secao-retratil" name="grade">
-                <summary class="secao-titulo">${dia} <span>▾</span></summary>
-                <div>${htmlAulas}</div>
-            </details>`;
+            let htmlAulas = aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"] || '--:--'}</div><div class="grade-info"><span style="font-weight:bold; font-size:0.95em; display:block;">${a["Matéria"]}</span><span style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span></div></div>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil" name="grade"><summary class="secao-titulo">${dia} <span>▾</span></summary><div>${htmlAulas}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
         setupAccordion("grade");
@@ -167,12 +159,7 @@
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Avisos";
         const itens = dadosApp["Avisos"] || [];
-        corpo.innerHTML = itens.slice().reverse().map(i => `
-            <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);">
-                <div style="font-size: 0.75em; color: #888; margin-bottom: 2px;">${formatarDataBR(i["Data"])}</div>
-                <div style="font-weight: 800; color: var(--p-med); font-size: 0.85em; margin-bottom: 8px; text-transform: uppercase;">${i["Titulo"]}</div>
-                <div style="font-size: 1em; line-height: 1.4; white-space: pre-wrap;">${String(i["Mensagem"] || "")}</div>
-            </div>`).join('');
+        corpo.innerHTML = itens.slice().reverse().map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);"><div style="font-size: 0.75em; color: #888; margin-bottom: 2px;">${formatarDataBR(i["Data"])}</div><div style="font-weight: 800; color: var(--p-med); font-size: 0.85em; margin-bottom: 8px; text-transform: uppercase;">${i["Titulo"]}</div><div style="font-size: 1em; line-height: 1.4; white-space: pre-wrap;">${String(i["Mensagem"] || "")}</div></div>`).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
@@ -182,15 +169,11 @@
         corpo.innerHTML = "";
         const itens = dadosApp["Arquivos"] || [];
         const nomesMaterias = [...new Set(itens.map(i => i["Nome"]))];
-
         nomesMaterias.forEach(n => {
             const links = itens.filter(i => i["Nome"] === n);
             let html = links.map(a => {
                 const temLink = a["Links"] && String(a["Links"]).includes("http");
-                return `<${temLink ? 'a href="'+a["Links"]+'" target="_blank"' : 'div'} class="item-lista">
-                    <span class="arquivo-nome">${a["Descrição"]}</span>
-                    ${temLink ? '<span>📂</span>' : '<span class="link-vazio">⏳ Aguardando links</span>'}
-                </${temLink ? 'a' : 'div'}>`;
+                return `<${temLink ? 'a href="'+a["Links"]+'" target="_blank"' : 'div'} class="item-lista"><span class="arquivo-nome">${a["Descrição"]}</span>${temLink ? '<span>📂</span>' : '<span class="link-vazio">⏳ Aguardando links</span>'}</${temLink ? 'a' : 'div'}>`;
             }).join('');
             corpo.innerHTML += `<details class="secao-retratil" name="arqs"><summary class="secao-titulo">${n} <span>▾</span></summary><div style="padding:5px 10px;">${html}</div></details>`;
         });
@@ -209,20 +192,15 @@
             const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
             let htmlGrupos = nomesG.map(ng => {
                 const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;">
-                    <summary style="padding:10px; font-size:0.9em;">${ng}</summary>
-                    <ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul>
-                </details>`;
+                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;"><summary style="padding:10px; font-size:0.9em;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul></details>`;
             }).join('');
-            document.getElementById('container-grupos').innerHTML += `<details class="secao-retratil" name="gps">
-                <summary class="secao-titulo">${mat} <span>▾</span></summary>
-                <div style="padding:10px;">${htmlGrupos}</div>
-            </details>`;
+            document.getElementById('container-grupos').innerHTML += `<details class="secao-retratil" name="gps"><summary class="secao-titulo">${mat} <span>▾</span></summary><div style="padding:10px;">${htmlGrupos}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
         setupAccordion("gps");
     }
 
+    // FUNÇÃO AULAS ONLINE COM LÓGICA DE CORES
     function abrirLinks() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Portal de Aulas Online";
@@ -237,50 +215,55 @@
                 const [hora, minuto] = i["Horário"].split(':');
                 const dataAula = new Date(ano, mes - 1, dia, hora, minuto);
                 
-                let statusHtml = "";
-                let btnCor = "#6c757d"; 
-                let textoBtn = "LINK INDISPONÍVEL";
+                let statusHtml = "", btnCor = "#6c757d", textoBtn = "LINK INDISPONÍVEL";
 
                 if (agora >= dataAula) {
-                    statusHtml = '<span style="color:#28a745; font-size:0.7em;">● AO VIVO</span>';
-                    btnCor = "#28a745";
-                    textoBtn = "ACESSAR AULA AGORA";
+                    statusHtml = '<span style="color:#28a745; font-size:0.7em; font-weight:bold;">● AO VIVO</span>';
+                    btnCor = "#28a745"; textoBtn = "ACESSAR AULA AGORA";
                 } else {
-                    statusHtml = `<span style="color:#ffa500; font-size:0.7em;">⌛ AGENDADA</span>`;
-                    btnCor = "#007bff";
-                    textoBtn = "ABRIR LINK";
+                    statusHtml = `<span style="color:#ffa500; font-size:0.7em; font-weight:bold;">⌛ AGENDADA</span>`;
+                    btnCor = "#007bff"; textoBtn = "ABRIR LINK";
                 }
 
-                return `
-                    <div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                            <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"]}</b>
-                            ${statusHtml}
-                        </div>
-                        <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">
-                            🗓️ ${i["Data"]} | ⏰ ${i["Horário"]}
-                        </div>
-                        <a href="${i["Url"]}" target="_blank" 
-                           style="background:${btnCor}; color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px; display:block;">
-                           ${textoBtn}
-                        </a>
-                    </div>`;
+                return `<div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"]}</b>
+                        ${statusHtml}
+                    </div>
+                    <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">🗓️ ${i["Data"]} | ⏰ ${i["Horário"]}</div>
+                    <a href="${i["Url"]}" target="_blank" style="background:${btnCor}; color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px; display:block;">${textoBtn}</a>
+                </div>`;
             }).join('');
         }
         document.getElementById('meuModal').style.display = 'flex';
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
+
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '💡';
         localStorage.setItem('med_h_theme', n);
     }
+
     window.onload = () => {
         const t = localStorage.getItem('med_h_theme') || 'dark';
         document.body.setAttribute('data-theme', t);
         carregarDados();
+
+        // LÓGICA DO TOQUE LONGO NO BOTÃO AULAS ONLINE (3 SEGUNDOS)
+        const btnAulas = document.getElementById('btnAulasOnline');
+        if(btnAulas) {
+            ['touchstart', 'mousedown'].forEach(evt => btnAulas.addEventListener(evt, () => {
+                timerPlanilha = setTimeout(() => {
+                    // SEU LINK DA PLANILHA AQUI
+                    window.open("https://docs.google.com/spreadsheets/d/1dQr8rqCfIyGqfkEIQCzqgxxKjsamDP3Nt4SpYu76D1o/edit?gid=968241645#gid=968241645", "_blank");
+                }, 3000);
+            }));
+            ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAulas.addEventListener(evt, () => clearTimeout(timerPlanilha)));
+        }
+
         setTimeout(() => { 
             const s = document.getElementById('splash');
             if(s) { s.style.opacity = '0'; setTimeout(() => s.style.display = 'none', 800); }
@@ -289,4 +272,3 @@
 </script>
 </body>
 </html>
-
