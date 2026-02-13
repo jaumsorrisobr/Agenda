@@ -11,7 +11,6 @@
     <meta name="theme-color" content="#007bff">
 
     <style>
-        /* CONFIGURAÇÃO DE CORES */
         :root { 
             --p-med: #007bff; 
             --bg: #f4f7f6; 
@@ -29,7 +28,6 @@
             --shadow: rgba(0,0,0,0.5);
         }
 
-        /* Estilos Base */
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             background: var(--bg); 
@@ -40,7 +38,6 @@
             padding-bottom: 100px;
         }
 
-        /* Splash Screen */
         #splash {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -51,7 +48,6 @@
         .logo-animado { width: 180px; animation: pulsar 2s infinite; }
         @keyframes pulsar { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* Botão Flutuante Lâmpada */
         #theme-toggle {
             position: fixed; bottom: 25px; right: 25px; z-index: 999;
             background: var(--card-bg); border: 2px solid var(--p-med);
@@ -60,7 +56,6 @@
             font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px var(--shadow);
         }
 
-        /* Header e Status */
         .header { 
             background: var(--header-bg); padding: 15px; border-radius: 12px; 
             box-shadow: 0 2px 5px var(--shadow); margin-bottom: 20px; text-align: center; 
@@ -68,7 +63,6 @@
         #status-bar { font-size: 0.8em; margin-top: 5px; color: #888; }
         .status-online { color: #5cb85c; font-weight: bold; }
 
-        /* Grid de Cards */
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { 
             background: var(--card-bg); padding: 20px; border-radius: 15px; text-align: center; 
@@ -78,7 +72,6 @@
         .card:active { transform: scale(0.95); }
         .card span { display: block; font-size: 1.5em; margin-bottom: 8px; }
 
-        /* Badge de Notificação */
         .notification-badge {
             position: absolute; top: 8px; right: 12px;
             background: #ff3b30; color: white; font-size: 9px;
@@ -87,25 +80,20 @@
         }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; z-index: 2000; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 80%; overflow-y: auto; position: relative; }
         .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); cursor: pointer; }
 
-        /* Itens do Modal */
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
         .aviso-titulo { font-weight: bold; color: var(--p-med); display: block; margin-bottom: 4px; }
 
-        /* BOTÃO SUGERIR ALTERAÇÃO - ESTILO VOLTOU! */
         .footer { margin-top: 30px; text-align: center; }
         .btn-email { 
             background: var(--p-med); color: white !important; 
             padding: 12px 25px; border-radius: 25px; 
             text-decoration: none; display: inline-block; 
             font-weight: bold; box-shadow: 0 4px 10px rgba(0,123,255,0.3);
-            transition: transform 0.2s;
         }
-        .btn-email:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -145,7 +133,6 @@
 </div>
 
 <script>
-    // COLOQUE SUA URL AQUI PARA FUNCIONAR
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec";
     let dadosApp = {};
 
@@ -155,22 +142,29 @@
             const res = await fetch(URL_API);
             const novosDados = await res.json();
             
+            // Puxa o cache antes de atualizar a variável global
             const cacheRaw = localStorage.getItem('cache_medicina');
-            const cacheAntigo = cacheRaw ? JSON.parse(cacheRaw) : null;
             
-            // Lógica de Notificação
-            if (cacheAntigo && cacheAntigo.Avisos && novosDados.Avisos && novosDados.Avisos.length > 0) {
-                const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Título;
-                const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Título;
+            if (cacheRaw) {
+                const cacheAntigo = JSON.parse(cacheRaw);
+                
+                // Só compara se as duas listas existirem e tiverem conteúdo
+                if (cacheAntigo.Avisos && novosDados.Avisos && novosDados.Avisos.length > 0) {
+                    const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Título;
+                    const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Título;
 
-                if (ultimoCache && ultimoNovo !== ultimoCache) {
-                    document.getElementById('badge-avisos').style.display = 'block';
+                    // A mágica: Só mostra se houver histórico E o título for diferente
+                    if (ultimoCache && ultimoNovo !== ultimoCache) {
+                        document.getElementById('badge-avisos').style.display = 'block';
+                    }
                 }
             }
 
+            // Agora sim, salva os novos dados no cache para a próxima vez
             dadosApp = novosDados;
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
+            
         } catch (e) {
             const cache = localStorage.getItem('cache_medicina');
             if(cache) {
@@ -227,7 +221,10 @@
 
     window.addEventListener('load', () => {
         carregarDados();
-        if (localStorage.getItem('theme') === 'dark') toggleTheme();
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
             setTimeout(() => {
