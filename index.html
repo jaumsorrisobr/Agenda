@@ -142,25 +142,21 @@
             const res = await fetch(URL_API);
             const novosDados = await res.json();
             
-            // Puxa o cache antes de atualizar a variável global
             const cacheRaw = localStorage.getItem('cache_medicina');
             
             if (cacheRaw) {
                 const cacheAntigo = JSON.parse(cacheRaw);
-                
-                // Só compara se as duas listas existirem e tiverem conteúdo
                 if (cacheAntigo.Avisos && novosDados.Avisos && novosDados.Avisos.length > 0) {
-                    const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Título;
-                    const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Título;
+                    // ATENÇÃO: Se na planilha estiver "Título", coloque acento aqui embaixo também
+                    const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Titulo;
+                    const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Titulo;
 
-                    // A mágica: Só mostra se houver histórico E o título for diferente
                     if (ultimoCache && ultimoNovo !== ultimoCache) {
                         document.getElementById('badge-avisos').style.display = 'block';
                     }
                 }
             }
 
-            // Agora sim, salva os novos dados no cache para a próxima vez
             dadosApp = novosDados;
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
@@ -189,13 +185,15 @@
             itens.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'aviso-item';
+                
                 if(nomeAba === "Avisos") {
-    div.innerHTML = `
-        <small style="color: #888; display: block; margin-bottom: 2px;">${item.Data || ''}</small>
-        <span class="aviso-titulo" style="font-size: 1.1em; margin-bottom: 5px;">${item.Titulo || 'Aviso'}</span>
-        <div style="font-size: 0.95em; line-height: 1.4;">${item.Mensagem || ''}</div>
-    `;
-}                } else if(nomeAba === "Grade") {
+                    // AQUI ESTÁ A MUDANÇA QUE VOCÊ PEDIU:
+                    div.innerHTML = `
+                        <small style="color: #888; display: block; margin-bottom: 2px;">${item.Data || ''}</small>
+                        <span class="aviso-titulo" style="font-size: 1.1em; margin-bottom: 5px;">${item.Titulo || 'Aviso'}</span>
+                        <div style="font-size: 0.95em; line-height: 1.4;">${item.Mensagem || ''}</div>
+                    `;
+                } else if(nomeAba === "Grade") {
                     div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small>${item.Horário || ''} - ${item.Sala || ''}</small>`;
                 } else {
                     div.innerHTML = Object.values(item).join(" - ");
@@ -240,4 +238,3 @@
 </script>
 </body>
 </html>
-
