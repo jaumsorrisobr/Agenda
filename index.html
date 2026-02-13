@@ -37,7 +37,6 @@
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; position: relative; text-align: left; }
         .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); cursor: pointer; padding: 5px; }
         
-        /* Pesquisa */
         .search-container { position: sticky; top: -26px; background: var(--card-bg); z-index: 10; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid var(--shadow); }
         .search-input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--input-bg); color: var(--text-color); box-sizing: border-box; font-size: 16px; outline: none; }
 
@@ -46,6 +45,8 @@
         
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
         .aviso-titulo { font-weight: bold; color: var(--text-color); display: block; }
+        
+        .arquivo-btn { display: inline-flex; align-items: center; background: var(--p-med); color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.85em; margin-top: 8px; font-weight: bold; }
         
         summary { outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
         summary::-webkit-details-marker { display: none; }
@@ -76,7 +77,7 @@
         <span id="badge-avisos" class="notification-badge">NOVO</span>
         <span>🔔</span>Avisos
     </div>
-    <div class="card" onclick="mostrarAba('Links')"><span>📸</span>Fotos</div>
+    <div class="card" onclick="mostrarAba('Arquivos')"><span>📄</span>Arquivos</div>
 </div>
 
 <div id="meuModal" class="modal">
@@ -125,7 +126,6 @@
             const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
             const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
             const ultimoLido = localStorage.getItem('ultimo_id_aviso_lido');
-            
             if (ultimoLido && idAvisoAtual === ultimoLido) {
                 document.getElementById('badge-avisos').style.display = 'none';
             } else if (!ultimoLido) {
@@ -150,25 +150,15 @@
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const boxes = document.querySelectorAll('.materia-box');
-        
         boxes.forEach(box => {
-            let materiaTemMatch = false;
-            const detalhes = box.querySelectorAll('details');
-            
-            detalhes.forEach(det => {
-                const textoGrupo = det.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                if (textoGrupo.includes(termo)) {
-                    det.style.display = "block";
-                    materiaTemMatch = true;
-                    // Se estiver pesquisando, abre o grupo automaticamente
+            let match = false;
+            box.querySelectorAll('details').forEach(det => {
+                if (det.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(termo)) {
+                    det.style.display = "block"; match = true;
                     if (termo.length > 2) det.setAttribute('open', 'true');
-                } else {
-                    det.style.display = "none";
-                    det.removeAttribute('open');
-                }
+                } else { det.style.display = "none"; det.removeAttribute('open'); }
             });
-            
-            box.style.display = materiaTemMatch ? "block" : "none";
+            box.style.display = match ? "block" : "none";
         });
     }
 
@@ -183,61 +173,42 @@
             corpo.innerHTML = "<p style='text-align:center; color:#888;'>Nada cadastrado aqui ainda.</p>";
         } else {
             if(nomeAba === "Grupos") {
-                // Adiciona Barra de Busca
-                corpo.innerHTML = `
-                    <div class="search-container">
-                        <input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar nome ou grupo..." oninput="filtrarGrupos()">
-                    </div>
-                `;
-
+                corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar nome ou grupo..." oninput="filtrarGrupos()"></div>`;
                 const estrutura = {}; 
                 itens.forEach(item => {
-                    const materia = formatarNome(item["Matéria"] || "Geral");
-                    const grupo = formatarNome(item["Nome do Grupo"] || "Sem Grupo");
-                    if(!estrutura[materia]) estrutura[materia] = {};
-                    if(!estrutura[materia][grupo]) estrutura[materia][grupo] = [];
-                    if(item["Integrantes"]) estrutura[materia][grupo].push(formatarNome(item["Integrantes"]));
+                    const mat = formatarNome(item["Matéria"] || "Geral");
+                    const grp = formatarNome(item["Nome do Grupo"] || "Sem Grupo");
+                    if(!estrutura[mat]) estrutura[mat] = {};
+                    if(!estrutura[mat][grp]) estrutura[mat][grp] = [];
+                    if(item["Integrantes"]) estrutura[mat][grp].push(formatarNome(item["Integrantes"]));
                 });
-
                 for (let mat in estrutura) {
-                    const boxMateria = document.createElement('div');
-                    boxMateria.className = 'materia-box';
-                    boxMateria.innerHTML = `<span class="materia-titulo">${mat}</span>`;
-
+                    const box = document.createElement('div'); box.className = 'materia-box';
+                    box.innerHTML = `<span class="materia-titulo">${mat}</span>`;
                     for (let grp in estrutura[mat]) {
                         const det = document.createElement('details');
-                        det.addEventListener('toggle', function() {
-                            // Só ativa o auto-recolhimento se o usuário não estiver pesquisando
-                            const termo = document.getElementById('inputBusca').value;
-                            if (this.open && termo.length === 0) {
-                                corpo.querySelectorAll('details').forEach(d => { if (d !== this) d.removeAttribute('open'); });
-                            }
-                        });
-
-                        const listaNomes = estrutura[mat][grp].map(n => `<li style="font-size:0.85em; margin-bottom:4px;">${n}</li>`).join('');
-                        det.innerHTML = `
-                            <summary style="cursor:pointer; color:var(--text-color); font-weight:600; font-size:0.95em;">
-                                <span>${grp}</span>
-                                <small style="color:#888; font-weight:normal;">${estrutura[mat][grp].length} ▾</small>
-                            </summary>
-                            <ul class="lista-integrantes">${listaNomes}</ul>
-                        `;
-                        boxMateria.appendChild(det);
+                        det.addEventListener('toggle', function() { if(this.open && !document.getElementById('inputBusca').value) corpo.querySelectorAll('details').forEach(d => { if(d !== this) d.removeAttribute('open'); }); });
+                        det.innerHTML = `<summary style="cursor:pointer; font-weight:600;"><span>${grp}</span><small style="color:#888;">${estrutura[mat][grp].length} ▾</small></summary>
+                                         <ul class="lista-integrantes">${estrutura[mat][grp].map(n => `<li style="font-size:0.85em; margin-bottom:4px;">${n}</li>`).join('')}</ul>`;
+                        box.appendChild(det);
                     }
-                    corpo.appendChild(boxMateria);
+                    corpo.appendChild(box);
                 }
+            } else if(nomeAba === "Arquivos") {
+                itens.reverse().forEach(item => {
+                    const div = document.createElement('div'); div.className = 'aviso-item';
+                    div.innerHTML = `<span class="aviso-titulo">${item.Nome || item.Título || 'Arquivo'}</span>
+                                     <small style="color:#888; display:block; margin:4px 0;">${item.Descrição || item.Descricao || ''}</small>
+                                     <a href="${item.Link}" target="_blank" class="arquivo-btn">📂 Abrir Arquivo</a>`;
+                    corpo.appendChild(div);
+                });
             } else {
-                const invertidos = [...itens].reverse();
-                invertidos.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'aviso-item';
+                itens.reverse().forEach(item => {
+                    const div = document.createElement('div'); div.className = 'aviso-item';
                     if(nomeAba === "Avisos") {
-                        let dF = item.Data ? new Date(item.Data).toLocaleDateString('pt-BR') : "";
-                        div.innerHTML = `<small style="color:#888;">${dF}</small><span class="aviso-titulo" style="color:var(--p-med);">${item.Titulo || item.Título || 'Aviso'}</span><div style="font-size:0.9em; margin-top:5px;">${item.Mensagem || ''}</div>`;
+                        div.innerHTML = `<small style="color:#888;">${item.Data ? new Date(item.Data).toLocaleDateString('pt-BR') : ""}</small><span class="aviso-titulo" style="color:var(--p-med);">${item.Titulo || 'Aviso'}</span><div style="font-size:0.9em; margin-top:5px;">${item.Mensagem || ''}</div>`;
                     } else if(nomeAba === "Grade") {
                         div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small style="color:#888;">${item.Horário || ''} - ${item.Sala || ''}</small>`;
-                    } else {
-                        div.innerHTML = Object.values(item).join(" - ");
                     }
                     corpo.appendChild(div);
                 });
@@ -247,13 +218,11 @@
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
-
     function toggleTheme() {
         const html = document.documentElement;
-        const icon = document.getElementById('theme-icon');
         const isDark = html.getAttribute('data-theme') === 'dark';
         html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        icon.innerText = isDark ? '💡' : '🌙';
+        document.getElementById('theme-icon').innerText = isDark ? '💡' : '🌙';
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
 
@@ -265,10 +234,7 @@
         }
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => { 
-                document.getElementById('splash').style.display = 'none'; 
-                document.getElementById('theme-toggle').style.display = 'flex'; 
-            }, 800);
+            setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('theme-toggle').style.display = 'flex'; }, 800);
         }, 1800);
     });
 </script>
