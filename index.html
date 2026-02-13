@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Medicine - Turma H</title>
+    <title>Agenda Medicina - Turma H</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -34,11 +34,8 @@
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
         .aviso-titulo { font-weight: bold; color: var(--p-med); display: block; margin-bottom: 4px; }
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 15px var(--shadow); cursor: pointer; }
-
-        /* Estilos para o recolhimento (Acordeão) */
         summary { outline: none; list-style: none; }
         summary::-webkit-details-marker { display: none; }
-        details[open] summary small { color: var(--p-med); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -100,16 +97,19 @@
     }
 
     function verificarNovosAvisos() {
+        // Agora só olha para a aba "Avisos"
         if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAvisoCeu = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            const tituloCeu = (ultimoAvisoCeu.Titulo || ultimoAvisoCeu.Título || "").toString().trim();
-            const ultimoLido = localStorage.getItem('ultimo_aviso_lido');
-            if (tituloCeu === "") return;
+            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
+            // Criamos uma "assinatura" do aviso combinando título e mensagem
+            const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
+            const ultimoLido = localStorage.getItem('ultimo_id_aviso_lido');
+
             if (!ultimoLido) {
-                localStorage.setItem('ultimo_aviso_lido', tituloCeu);
+                localStorage.setItem('ultimo_id_aviso_lido', idAvisoAtual);
                 return;
             }
-            if (tituloCeu !== ultimoLido) {
+
+            if (idAvisoAtual !== ultimoLido) {
                 document.getElementById('badge-avisos').style.display = 'block';
             } else {
                 document.getElementById('badge-avisos').style.display = 'none';
@@ -121,9 +121,9 @@
         mostrarAba('Avisos');
         document.getElementById('badge-avisos').style.display = 'none';
         if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAvisoCeu = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            const tituloCeu = (ultimoAvisoCeu.Titulo || ultimoAvisoCeu.Título || "").toString().trim();
-            localStorage.setItem('ultimo_aviso_lido', tituloCeu);
+            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
+            const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
+            localStorage.setItem('ultimo_id_aviso_lido', idAvisoAtual);
         }
     }
 
@@ -154,10 +154,9 @@
                     const div = document.createElement('div');
                     div.className = 'aviso-item';
                     const listaHTML = gruposAgrupados[nomeG].map(n => `<li style="margin-bottom:3px; font-size:0.85em;">${n}</li>`).join('');
-                    
                     div.innerHTML = `
-                        <details style="cursor: pointer;">
-                            <summary class="aviso-titulo" style="display: flex; justify-content: space-between; align-items: center; color:var(--p-med);">
+                        <details>
+                            <summary class="aviso-titulo" style="display: flex; justify-content: space-between; align-items: center; color:var(--p-med); cursor:pointer;">
                                 <span>${nomeG}</span>
                                 <small style="color: #888; font-weight: normal; font-size: 0.75em;">${gruposAgrupados[nomeG].length} nomes ▾</small>
                             </summary>
