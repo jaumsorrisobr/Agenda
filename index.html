@@ -81,12 +81,60 @@
     </div>
 </div>
 
+<div id="modalLinkAdmin" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+        <h3 style="color:#28a745;">Postar Aula Online</h3>
+        <input type="password" id="senhaLink" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="dataLink" placeholder="Data (DD/MM/AAAA)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="horaLink" placeholder="Horário (HH:MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="materiaLink" placeholder="Matéria" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="urlLink" placeholder="Link (URL)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <button onclick="enviarDados('Links')" style="width:100%; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold;">ENVIAR AULA</button>
+        <div id="msgLink" style="margin-top:10px; text-align:center; font-weight:bold;"></div>
+    </div>
+</div>
+
+<div id="modalAvisoAdmin" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+        <h3 style="color:#ffc107;">Postar Novo Aviso</h3>
+        <input type="password" id="senhaAviso" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="tituloAviso" placeholder="Título" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <textarea id="textoAviso" placeholder="Mensagem..." rows="4" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white; font-family:sans-serif;"></textarea>
+        <button onclick="enviarDados('Avisos')" style="width:100%; padding:15px; background:#ffc107; color:black; border:none; border-radius:10px; font-weight:bold;">POSTAR AVISO</button>
+        <div id="msgAviso" style="margin-top:10px; text-align:center; font-weight:bold;"></div>
+    </div>
+</div>
+
+<div class="footer-creditos" id="btnAdmin" style="text-align: center; font-size: 11px; color: #888; margin-top: 40px; cursor: pointer;">
+    Desenvolvido por João Vitor Fróis Sanchez
+</div>
+
 <script>
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec";
     let dadosApp = {};
+    let timerAdmin, timerPlanilha;
 
     window.onload = () => {
         carregarDados();
+        
+        // Timer Painel Aulas Online (Segurar 5s)
+        const btnAulas = document.getElementById('btnAulasOnline');
+        const ligarTimerLink = () => timerPlanilha = setTimeout(() => document.getElementById('modalLinkAdmin').style.display = 'flex', 5000);
+        btnAulas.addEventListener('touchstart', ligarTimerLink);
+        btnAulas.addEventListener('mousedown', ligarTimerLink);
+        btnAulas.addEventListener('touchend', () => clearTimeout(timerPlanilha));
+        btnAulas.addEventListener('mouseup', () => clearTimeout(timerPlanilha));
+
+        // Timer Painel Avisos (Segurar 5s no seu nome)
+        const btnCreditos = document.getElementById('btnAdmin');
+        const ligarTimerAviso = () => timerAdmin = setTimeout(() => document.getElementById('modalAvisoAdmin').style.display = 'flex', 5000);
+        btnCreditos.addEventListener('touchstart', ligarTimerAviso);
+        btnCreditos.addEventListener('mousedown', ligarTimerAviso);
+        btnCreditos.addEventListener('touchend', () => clearTimeout(timerAdmin));
+        btnCreditos.addEventListener('mouseup', () => clearTimeout(timerAdmin));
+
         setTimeout(() => {
             const splash = document.getElementById('splash');
             splash.style.opacity = '0';
@@ -107,11 +155,9 @@
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
-    
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
-        document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '💡';
     }
 
     function setupAccordion(classeAlvo) {
@@ -119,9 +165,7 @@
         detalhes.forEach(targetDetail => {
             targetDetail.addEventListener('toggle', function() {
                 if (this.open) {
-                    detalhes.forEach(detail => {
-                        if (detail !== this) detail.removeAttribute("open");
-                    });
+                    detalhes.forEach(detail => { if (detail !== this) detail.removeAttribute("open"); });
                 }
             });
         });
@@ -153,19 +197,15 @@
 
     function abrirAvisos() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Avisos da Turma";
+        document.getElementById('modal-titulo').innerText = "Avisos";
         const itens = (dadosApp["Avisos"] || []).slice().reverse();
-        if (itens.length === 0) {
-            corpo.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Nenhum aviso no momento.</p>";
-        } else {
-            corpo.innerHTML = itens.map(i => `
-                <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);">
-                    <div style="font-size: 0.75em; color: #888;">${formatarDataBR(i["Data"])}</div>
-                    <div style="font-weight:800; color:var(--p-med); text-transform:uppercase; margin-top:3px;">${i["Titulo"]}</div>
-                    <div style="white-space:pre-wrap; margin-top:8px; line-height:1.4;">${i["Mensagem"]}</div>
-                </div>
-            `).join('');
-        }
+        corpo.innerHTML = itens.map(i => `
+            <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);">
+                <div style="font-size: 0.75em; color: #888;">${formatarDataBR(i["Data"])}</div>
+                <div style="font-weight:800; color:var(--p-med); text-transform:uppercase;">${i["Titulo"]}</div>
+                <div style="white-space:pre-wrap; margin-top:5px;">${i["Mensagem"]}</div>
+            </div>
+        `).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
@@ -188,13 +228,8 @@
 
     function abrirGrupos() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Grupos e Integrantes";
-        corpo.innerHTML = `
-            <div class="search-container">
-                <input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar nome ou matéria..." onkeyup="filtrarGrupos()">
-            </div>
-            <div id="container-grupos"></div>
-        `;
+        document.getElementById('modal-titulo').innerText = "Grupos";
+        corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar..." onkeyup="filtrarGrupos()"></div><div id="container-grupos"></div>`;
         renderizarGrupos(dadosApp["Grupos"] || []);
         document.getElementById('meuModal').style.display = 'flex';
     }
@@ -220,11 +255,7 @@
 
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
-        const filtrados = (dadosApp["Grupos"] || []).filter(g => 
-            String(g["Matéria"]).toLowerCase().includes(termo) ||
-            String(g["Nome do Grupo"]).toLowerCase().includes(termo) ||
-            String(g["Integrantes"]).toLowerCase().includes(termo)
-        );
+        const filtrados = (dadosApp["Grupos"] || []).filter(g => String(g["Matéria"]).toLowerCase().includes(termo) || String(g["Nome do Grupo"]).toLowerCase().includes(termo) || String(g["Integrantes"]).toLowerCase().includes(termo));
         renderizarGrupos(filtrados);
     }
 
@@ -232,19 +263,37 @@
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Aulas Online";
         const itens = dadosApp["Links"] || [];
-        if (itens.length === 0) {
-            corpo.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Nenhum link agendado.</p>";
-        } else {
-            corpo.innerHTML = itens.map(i => {
-                const url = i["Url"].startsWith('http') ? i["Url"] : 'https://' + i["Url"];
-                return `<div class="item-lista" style="flex-direction:column; align-items:flex-start;">
-                    <b>${i["Materia"]}</b>
-                    <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">🗓️ ${i["Data"]} - ${i["Horário"]}</div>
-                    <a href="${url}" target="_blank" style="background:var(--p-med); color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ACESSAR AULA</a>
-                </div>`;
-            }).join('');
-        }
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center; opacity:0.5;'>Nenhum link agendado.</p>" : itens.map(i => {
+            const url = i["Url"].startsWith('http') ? i["Url"] : 'https://' + i["Url"];
+            return `<div class="item-lista" style="flex-direction:column; align-items:flex-start;">
+                <b>${i["Materia"]}</b>
+                <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">🗓️ ${i["Data"]} - ${i["Horário"]}</div>
+                <a href="${url}" target="_blank" style="background:var(--p-med); color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ACESSAR AULA</a>
+            </div>`;
+        }).join('');
         document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    async function enviarDados(tipo) {
+        const msgDiv = tipo === 'Links' ? document.getElementById('msgLink') : document.getElementById('msgAviso');
+        msgDiv.innerText = "Enviando...";
+        let payload = { aba: tipo };
+        if (tipo === 'Links') {
+            payload.senha = document.getElementById('senhaLink').value;
+            payload.data = document.getElementById('dataLink').value;
+            payload.horario = document.getElementById('horaLink').value;
+            payload.materia = document.getElementById('materiaLink').value;
+            payload.url = document.getElementById('urlLink').value;
+        } else {
+            payload.senha = document.getElementById('senhaAviso').value;
+            payload.titulo = document.getElementById('tituloAviso').value;
+            payload.mensagem = document.getElementById('textoAviso').value;
+        }
+        try {
+            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            msgDiv.innerText = "Sucesso! Recarregando...";
+            setTimeout(() => location.reload(), 2000);
+        } catch (e) { msgDiv.innerText = "Erro no envio."; }
     }
 </script>
 </body>
