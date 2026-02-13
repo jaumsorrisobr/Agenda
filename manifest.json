@@ -1,20 +1,24 @@
 {
-  "short_name": "Medicina - Turma H",
+  "short_name": "Medicina H",
   "name": "Agenda Medicina - Turma H",
+  "description": "Agenda e Grupos da Turma H de Medicina - UCP",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#007bff",
   "background_color": "#ffffff"
 }
