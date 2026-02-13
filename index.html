@@ -187,12 +187,27 @@
                 div.className = 'aviso-item';
                 
                 if(nomeAba === "Avisos") {
-                    // AQUI ESTÁ A MUDANÇA QUE VOCÊ PEDIU:
+                    // Lógica para formatar a data de ISO para dd/mm/aaaa
+                    let dataFormatada = "";
+                    if (item.Data) {
+                        const d = new Date(item.Data);
+                        // Verifica se a data é válida antes de formatar
+                        if (!isNaN(d.getTime())) {
+                            const dia = String(d.getDate()).padStart(2, '0');
+                            const mes = String(d.getMonth() + 1).padStart(2, '0');
+                            const ano = d.getFullYear();
+                            dataFormatada = `${dia}/${mes}/${ano}`;
+                        } else {
+                            dataFormatada = item.Data; // Mantém o original se não for uma data padrão
+                        }
+                    }
+
                     div.innerHTML = `
-                        <small style="color: #888; display: block; margin-bottom: 2px;">${item.Data || ''}</small>
+                        <small style="color: #888; display: block; margin-bottom: 2px;">${dataFormatada}</small>
                         <span class="aviso-titulo" style="font-size: 1.1em; margin-bottom: 5px;">${item.Titulo || 'Aviso'}</span>
                         <div style="font-size: 0.95em; line-height: 1.4;">${item.Mensagem || ''}</div>
                     `;
+                }
                 } else if(nomeAba === "Grade") {
                     div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small>${item.Horário || ''} - ${item.Sala || ''}</small>`;
                 } else {
@@ -238,3 +253,4 @@
 </script>
 </body>
 </html>
+
