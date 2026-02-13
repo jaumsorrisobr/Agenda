@@ -165,7 +165,7 @@
                 div.className = 'aviso-item';
                 
                 if(nomeAba === "Avisos") {
-                    // Lógica para tratar e formatar a data corretamente
+                    // Formata a data para DD/MM/AAAA
                     let dataFormatada = "";
                     if (item.Data) {
                         const d = new Date(item.Data);
@@ -186,6 +186,16 @@
                     `;
                 } else if(nomeAba === "Grade") {
                     div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small>${item.Horário || ''} - ${item.Sala || ''}</small>`;
+                } else if(nomeAba === "Grupos") {
+                    // Lógica para transformar texto com ";" em lista de integrantes
+                    let integrantesHTML = "";
+                    if (item.Integrantes) {
+                        const lista = item.Integrantes.split(';'); 
+                        integrantesHTML = `<ul style="margin: 8px 0 0 0; padding-left: 20px; text-align: left; font-size: 0.9em; color: var(--text-color);">` + 
+                                          lista.map(nome => `<li style="margin-bottom: 4px;">${nome.trim()}</li>`).join('') + 
+                                          `</ul>`;
+                    }
+                    div.innerHTML = `<span class="aviso-titulo" style="color: var(--p-med); font-size: 1.1em;">${item.Nome_do_grupo || item.Grupo || 'Grupo'}</span>${integrantesHTML}`;
                 } else {
                     div.innerHTML = Object.values(item).join(" - ");
                 }
@@ -228,4 +238,5 @@
 </script>
 </body>
 </html>
+
 
