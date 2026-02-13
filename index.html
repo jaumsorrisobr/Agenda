@@ -93,8 +93,17 @@
         ul.lista-integrantes { padding: 0 15px 15px 35px !important; margin: 0 !important; list-style-type: circle; border-left: 3px solid var(--p-med); margin-left: 15px !important; text-align: left; }
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
-        .footer-creditos { text-align: center; font-size: 11px; color: #888; padding-bottom: 30px; width: 100%; font-style: italic; opacity: 0.8; cursor: default; }
-        
+        .footer-creditos {
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    padding-bottom: 40px; /* Espaço extra no final da página */
+    margin-top: 50px;     /* Isso empurra seu nome para longe do botão */
+    width: 100%;
+    font-style: italic;
+    opacity: 0.8;
+    cursor: default;
+}        
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); }
         .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
     </style>
@@ -152,6 +161,7 @@
         💡 Sugerir alteração no App
     </a>
 </div>
+
 <div class="footer-creditos" id="meuNomeSegredo">Desenvolvido por João Vitor Fróis Sanchez</div>
 
 <script>
@@ -339,3 +349,4 @@
 </script>
 </body>
 </html>
+
