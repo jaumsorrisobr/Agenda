@@ -16,7 +16,6 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        /* CONFIGURAÇÃO DE CORES (VARIÁVEIS) */
         :root { 
             --p-med: #007bff; 
             --bg: #f4f7f6; 
@@ -34,7 +33,6 @@
             --shadow: rgba(0,0,0,0.5);
         }
 
-        /* Estilo para a bolinha de notificação - Versão Compacta */
         .notification-badge {
             position: absolute;
             top: 5px;
@@ -63,10 +61,9 @@
             color: var(--text-color); 
             -webkit-tap-highlight-color: transparent;
             transition: background 0.3s, color 0.3s;
-            padding-bottom: 80px; /* Espaço para o botão não cobrir conteúdo */
+            padding-bottom: 80px;
         }
 
-        /* Container da Splash */
         #splash {
             position: fixed;
             top: 0; left: 0;
@@ -86,7 +83,6 @@
             animation: entrarESurgir 1.2s ease-out forwards, pulsar 2s infinite 1.2s;
         }
 
-        /* Botão da Lâmpada - Canto Inferior Direito */
         #theme-toggle {
             position: fixed;
             bottom: 25px;
@@ -103,10 +99,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
         }
-
-        #theme-toggle:active { transform: scale(0.85); }
 
         @keyframes entrarESurgir {
             0% { opacity: 0; transform: scale(0.7); }
@@ -134,21 +127,18 @@
             background: var(--card-bg); padding: 20px; border-radius: 15px; text-align: center; 
             box-shadow: 0 4px 6px var(--shadow); cursor: pointer; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            font-weight: 600; transition: transform 0.1s, background 0.3s;
+            font-weight: 600; transition: transform 0.1s;
             position: relative;
         }
         .card:active { transform: scale(0.95); }
         .card span { font-size: 1.5em; margin-bottom: 8px; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; z-index: 1000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 80%; overflow-y: auto; position: relative; color: var(--text-color); }
         
         .close-btn { background: var(--bg); color: var(--text-color); border: none; padding: 10px; border-radius: 50%; position: absolute; top: 10px; right: 10px; cursor: pointer; }
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
-        .aviso-titulo { font-weight: bold; color: var(--p-med); display: block; margin-bottom: 4px; }
-        
-        .footer { margin-top: 30px; text-align: center; }
-        .btn-email { background: var(--p-med); color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; display: inline-block; font-weight: bold; }
+        .aviso-titulo { font-weight: bold; color: var(--p-med); display: block; }
     </style>
 </head>
 <body>
@@ -185,12 +175,12 @@
     </div>
 </div>
 
-<div class="footer">
+<div class="footer" style="text-align:center; margin-top:20px;">
     <a href="mailto:seuemail@gmail.com" class="btn-email">📧 Sugerir Alteração</a>
 </div>
 
 <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec";
+    const URL_API = "SUA_URL_DO_APPS_SCRIPT_AQUI";
     let dadosApp = {};
 
     function toggleTheme() {
@@ -216,12 +206,11 @@
             const cacheRaw = localStorage.getItem('cache_medicina');
             const cacheAntigo = cacheRaw ? JSON.parse(cacheRaw) : null;
             
-            // Lógica de Notificação aprimorada
+            // Lógica de Notificação por Título
             if (cacheAntigo && cacheAntigo.Avisos && novosDados.Avisos && novosDados.Avisos.length > 0) {
                 const ultimoNovo = novosDados.Avisos[novosDados.Avisos.length - 1].Título;
                 const ultimoCache = cacheAntigo.Avisos[cacheAntigo.Avisos.length - 1]?.Título;
 
-                // Só mostra se o título mudou E se não for a primeira vez do usuário
                 if (ultimoCache && ultimoNovo !== ultimoCache) {
                     document.getElementById('badge-avisos').style.display = 'block';
                 }
@@ -229,4 +218,70 @@
 
             dadosApp = novosDados;
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
-            status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>
+            status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
+        } catch (e) {
+            const cache = localStorage.getItem('cache_medicina');
+            if(cache) {
+                dadosApp = JSON.parse(cache);
+                status.innerHTML = `<span>● Offline - Dados de: ${dadosApp.ultima_sincronizacao}</span>`;
+            }
+        }
+    }
+
+    function limparNotificacao() {
+        const badge = document.getElementById('badge-avisos');
+        if(badge) badge.style.display = 'none';
+    }
+
+    function mostrarAba(nomeAba) {
+        const modal = document.getElementById('meuModal');
+        const titulo = document.getElementById('modal-titulo');
+        const corpo = document.getElementById('modal-corpo');
+        titulo.innerText = nomeAba;
+        corpo.innerHTML = "";
+
+        let itens = dadosApp[nomeAba] || [];
+        itens = [...itens].reverse();
+
+        if(itens.length === 0) {
+            corpo.innerHTML = "<p>Nada cadastrado aqui ainda.</p>";
+        } else {
+            itens.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'aviso-item';
+                let conteudo = "";
+                if(nomeAba === "Avisos") {
+                    conteudo = `<span class="aviso-titulo">${item.Título || 'Sem título'}</span><span>${item.Mensagem || ''}</span>`;
+                } else if(nomeAba === "Grade") {
+                    conteudo = `<span class="aviso-titulo">${item.Matéria || ''}</span><small>${item.Horário || ''} - ${item.Sala || ''}</small>`;
+                } else {
+                    conteudo = Object.values(item).join(" - ");
+                }
+                div.innerHTML = conteudo;
+                corpo.appendChild(div);
+            });
+        }
+        modal.style.display = "flex";
+    }
+
+    function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
+
+    window.addEventListener('load', () => {
+        carregarDados();
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').innerText = '🌙';
+        }
+        setTimeout(() => {
+            const splash = document.getElementById('splash');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                document.getElementById('theme-toggle').style.display = 'flex';
+            }, 800);
+        }, 2500);
+    });
+</script>
+</body>
+</html>
