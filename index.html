@@ -25,22 +25,13 @@
             color: var(--text-color); 
             transition: background 0.3s; 
             padding-bottom: 100px;
-            /* BLOQUEIA O REFRESH NATIVO DO ANDROID */
             overscroll-behavior-y: contain; 
         }
 
         #refresh-indicator {
-            position: fixed;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--p-med);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 10001;
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+            background: var(--p-med); color: white; padding: 10px 25px;
+            border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 10001;
             transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 4px 15px var(--shadow);
         }
@@ -67,34 +58,18 @@
 
         .materia-retratil { margin-bottom: 10px; border: 1px solid var(--shadow); border-radius: 12px; background: var(--card-bg); overflow: hidden; width: 100%; }
         summary { display: grid !important; grid-template-columns: 1fr 40px !important; align-items: center !important; width: 100% !important; padding: 14px 15px !important; cursor: pointer; list-style: none; }
-        summary::-webkit-details-marker { display: none; }
         .materia-sumario { background: rgba(0,123,255,0.07); font-weight: 800; color: var(--p-med); text-transform: uppercase; font-size: 0.8em; }
         .materia-sumario::after { content: '📁'; text-align: right; }
         .materia-retratil[open] .materia-sumario::after { content: '📂'; }
 
         ul.lista-integrantes { padding: 10px 15px 15px 40px !important; margin: 0 !important; list-style-type: circle; border-left: 3px solid var(--p-med); margin-left: 15px !important; }
-        ul.lista-integrantes li { font-size: 0.85em; margin-bottom: 5px; word-break: break-word; }
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
 
+        .footer-creditos { text-align: center; font-size: 11px; color: #888; padding: 20px 0; width: 100%; font-style: italic; opacity: 0.8; }
+        
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); font-family: inherit; }
-        .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #statusEnvio { text-align: center; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
-
-        .arquivo-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    margin: 5px 0;
-    background: var(--input-bg);
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: transform 0.2s;
-}
-.arquivo-item:active { transform: scale(0.98); }
-.arquivo-link-icon { color: var(--p-med); font-size: 1.2em; }
+        .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -137,8 +112,8 @@
         <div class="admin-form">
             <input type="password" id="adminSenha" placeholder="Senha de Acesso">
             <hr style="opacity: 0.2;">
-            <input type="text" id="avisoTitulo" placeholder="Título (ex: Mudança de Sala)">
-            <textarea id="avisoTexto" rows="4" placeholder="Mensagem para a turma..."></textarea>
+            <input type="text" id="avisoTitulo" placeholder="Título">
+            <textarea id="avisoTexto" rows="4" placeholder="Mensagem..."></textarea>
             <button class="btn-postar" onclick="enviarAviso()">🚀 Postar Agora</button>
         </div>
         <div id="statusEnvio"></div>
@@ -149,26 +124,15 @@
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec"; 
     let dadosApp = {};
     let timerAdmin;
-
-    // --- LÓGICA DE ATUALIZAÇÃO (PULL-TO-REFRESH) CORRIGIDA ---
     let touchStart = 0;
     let touchEnd = 0;
     const indicator = document.getElementById('refresh-indicator');
 
-    window.addEventListener('touchstart', (e) => {
-        touchStart = e.targetTouches[0].pageY;
-    }, { passive: true });
-
+    window.addEventListener('touchstart', (e) => { touchStart = e.targetTouches[0].pageY; }, { passive: true });
     window.addEventListener('touchmove', (e) => {
         touchEnd = e.targetTouches[0].pageY;
         const distance = touchEnd - touchStart;
-
-        // Se estiver no topo e puxar para baixo
-        if (window.scrollY <= 0 && distance > 0) {
-            if (distance > 80) {
-                indicator.style.top = '20px';
-            }
-        }
+        if (window.scrollY <= 0 && distance > 80) indicator.style.top = '20px';
     }, { passive: true });
 
     window.addEventListener('touchend', async () => {
@@ -177,34 +141,27 @@
             indicator.innerText = "🔄 Atualizando...";
             await carregarDados();
             indicator.innerText = "✅ Atualizado!";
-            setTimeout(() => {
-                indicator.style.top = '-60px';
-            }, 1000);
+            setTimeout(() => { indicator.style.top = '-60px'; }, 1000);
         }
-        touchStart = 0;
-        touchEnd = 0;
+        touchStart = 0; touchEnd = 0;
     });
-
-    // --- RESTANTE DAS FUNÇÕES ---
 
     const tituloHeader = document.getElementById('tituloPrincipal');
     tituloHeader.addEventListener('touchstart', () => timerAdmin = setTimeout(abrirAdmin, 5000));
     tituloHeader.addEventListener('touchend', () => clearTimeout(timerAdmin));
-    tituloHeader.addEventListener('mousedown', () => timerAdmin = setTimeout(abrirAdmin, 5000));
-    tituloHeader.addEventListener('mouseup', () => clearTimeout(timerAdmin));
 
     function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
     function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
 
     async function enviarAviso() {
         const senha = document.getElementById('adminSenha').value;
-        const titulo = document.getElementById('avisoTitulo').value;
-        const mensagem = document.getElementById('avisoTexto').value;
         const status = document.getElementById('statusEnvio');
-        if(!senha || !titulo || !mensagem) { status.innerText = "⚠️ Preencha tudo!"; return; }
         status.innerText = "Enviando... ⏳";
         try {
-            const response = await fetch(URL_API, { method: 'POST', body: JSON.stringify({ senha, titulo, mensagem }) });
+            const response = await fetch(URL_API, { 
+                method: 'POST', 
+                body: JSON.stringify({ senha, titulo: document.getElementById('avisoTitulo').value, mensagem: document.getElementById('avisoTexto').value }) 
+            });
             const resultado = await response.text();
             if (resultado === "Sucesso") {
                 status.innerText = "✅ Postado!";
@@ -235,9 +192,7 @@
         if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
             const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
             const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
-            if(localStorage.getItem('ultimo_id_aviso_lido') !== idAvisoAtual) {
-                document.getElementById('badge-avisos').style.display = 'block';
-            }
+            if(localStorage.getItem('ultimo_id_aviso_lido') !== idAvisoAtual) document.getElementById('badge-avisos').style.display = 'block';
         }
     }
 
@@ -250,71 +205,79 @@
         }
     }
 
-    if (nomeAba === "Arquivos") {
-        const estrutura = {};
-        itens.forEach(item => {
-            const categoria = item.Nome || "Geral";
-            if (!estrutura[categoria]) estrutura[categoria] = [];
-            estrutura[categoria].push(item);
-        });
+    function mostrarAba(nomeAba) {
+        const modal = document.getElementById('meuModal');
+        const corpo = document.getElementById('modal-corpo');
+        document.getElementById('modal-titulo').innerText = nomeAba;
+        corpo.innerHTML = "";
+        let itens = dadosApp[nomeAba] || [];
 
-        for (let categoria in estrutura) {
-            const det = document.createElement('details');
-            det.className = 'materia-retratil';
+        if (nomeAba === "Arquivos" || nomeAba === "Grupos") {
+            if(nomeAba === "Grupos") corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar..." oninput="filtrarGrupos()"></div>`;
             
-            // Lógica de fechar os outros ao abrir um
-            det.addEventListener('toggle', function() {
-                if (this.open) {
-                    document.querySelectorAll('.materia-retratil').forEach(d => {
-                        if (d !== this) d.open = false;
-                    });
-                }
+            const estrutura = {};
+            itens.forEach(item => {
+                const cat = nomeAba === "Arquivos" ? (item.Nome || "Geral") : formatarNome(item["Matéria"] || "Geral");
+                if (!estrutura[cat]) estrutura[cat] = [];
+                estrutura[cat].push(item);
             });
 
-            det.innerHTML = `
-                <summary class="materia-sumario"><span>${categoria}</span></summary>
-                <div style="padding: 10px;">
-                    ${estrutura[categoria].map(arq => `
-                        <a href="${arq.Link}" target="_blank" class="arquivo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none;">
-                            <div style="color: var(--text-color); font-size: 0.95em; font-weight: 500;">
-                                ${arq.Descrição || 'Sem descrição'}
-                            </div>
-                            <span style="color: var(--p-med); margin-left: 10px;">🔗</span>
-                        </a>
-                    `).join('')}
-                </div>
-            `;
-            corpo.appendChild(det);
+            for (let cat in estrutura) {
+                const det = document.createElement('details');
+                det.className = 'materia-retratil';
+                det.addEventListener('toggle', function() {
+                    if (this.open) document.querySelectorAll('.materia-retratil').forEach(d => { if (d !== this) d.open = false; });
+                });
+
+                let conteudoInterno = "";
+                if(nomeAba === "Arquivos") {
+                    conteudoInterno = estrutura[cat].map(arq => `
+                        <a href="${arq.Link}" target="_blank" class="arquivo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: inherit;">
+                            <div style="font-size: 0.95em; font-weight: 500;">${arq.Descrição || 'Ver Arquivo'}</div>
+                            <span style="color: var(--p-med);">🔗</span>
+                        </a>`).join('');
+                } else {
+                    const grps = {};
+                    estrutura[cat].forEach(i => {
+                        const g = formatarNome(i["Nome do Grupo"] || "Sem Nome");
+                        if(!grps[g]) grps[g] = [];
+                        grps[g].push(formatarNome(i["Integrantes"]));
+                    });
+                    conteudoInterno = Object.keys(grps).map(g => `
+                        <details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px;">
+                            <summary style="padding:10px; font-size:0.9em; font-weight:bold; cursor:pointer;">${g} <small style="float:right">${grps[g].length} ▾</small></summary>
+                            <ul class="lista-integrantes" style="font-size:0.85em; list-style:circle; padding-bottom:10px;">${grps[g].map(n => `<li>${n}</li>`).join('')}</ul>
+                        </details>`).join('');
+                }
+
+                det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding: 10px;">${conteudoInterno}</div>`;
+                corpo.appendChild(det);
+            }
+        } else {
+            itens.slice().reverse().forEach(item => {
+                const div = document.createElement('div');
+                div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
+                div.innerHTML = `<b>${item.Matéria || item.Nome || item.Titulo || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || item.Mensagem || ''}</small>`;
+                corpo.appendChild(div);
+            });
         }
+        modal.style.display = "flex";
     }
-    else if (nomeAba === "Grupos") {
-        // ... (mantenha sua lógica de grupos aqui, mas adicione a função de fechar os outros)
-        // Dica: Adicione o mesmo eventListener de 'toggle' nos detalhes dos grupos
-    } else {
-        // ... (resto da lógica de Avisos e Grade)
-        itens.slice().reverse().forEach(item => {
-            const div = document.createElement('div');
-            div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
-            div.innerHTML = `<b>${item.Matéria || item.Nome || item.Titulo || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || item.Mensagem || ''}</small>`;
-            corpo.appendChild(div);
-        });
-    }
-    modal.style.display = "flex";
-}
 
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
-        const itens = document.querySelectorAll('.grupo-detalhe');
-        itens.forEach(item => {
-            const texto = item.innerText.toLowerCase();
-            item.style.display = texto.includes(termo) ? "block" : "none";
-            if(termo.length > 0 && texto.includes(termo)) item.open = true;
-            else if (termo.length === 0) item.open = false;
+        document.querySelectorAll('.materia-retratil').forEach(mat => {
+            let matches = 0;
+            mat.querySelectorAll('.grupo-detalhe').forEach(grp => {
+                const texto = grp.innerText.toLowerCase();
+                if(texto.includes(termo)) { grp.style.display = "block"; matches++; } else { grp.style.display = "none"; }
+            });
+            mat.style.display = matches > 0 ? "block" : "none";
+            if(termo.length > 0 && matches > 0) mat.open = true;
         });
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
-    
     function toggleTheme() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
@@ -334,7 +297,7 @@
         }, 1500);
     });
 </script>
+
+<div class="footer-creditos">Desenvolvido por João Vitor Fróis Sanchez</div>
 </body>
 </html>
-
-
