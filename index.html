@@ -213,7 +213,9 @@
         let itens = dadosApp[nomeAba] || [];
 
         if (nomeAba === "Arquivos" || nomeAba === "Grupos") {
-            if(nomeAba === "Grupos") corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar..." oninput="filtrarGrupos()"></div>`;
+            if(nomeAba === "Grupos") {
+                corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar..." oninput="filtrarGrupos()"></div>`;
+            }
             
             const estrutura = {};
             itens.forEach(item => {
@@ -225,6 +227,8 @@
             for (let cat in estrutura) {
                 const det = document.createElement('details');
                 det.className = 'materia-retratil';
+                det.style.width = "100%"; // Garante largura total
+                
                 det.addEventListener('toggle', function() {
                     if (this.open) document.querySelectorAll('.materia-retratil').forEach(d => { if (d !== this) d.open = false; });
                 });
@@ -232,9 +236,11 @@
                 let conteudoInterno = "";
                 if(nomeAba === "Arquivos") {
                     conteudoInterno = estrutura[cat].map(arq => `
-                        <a href="${arq.Link}" target="_blank" class="arquivo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: inherit;">
-                            <div style="font-size: 0.95em; font-weight: 500;">${arq.Descrição || 'Ver Arquivo'}</div>
-                            <span style="color: var(--p-med);">🔗</span>
+                        <a href="${arq.Link}" target="_blank" class="arquivo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: inherit; width: 100%; box-sizing: border-box;">
+                            <div style="font-size: 0.95em; font-weight: 500; text-align: left; flex: 1; padding-right: 10px; word-break: break-word;">
+                                ${arq.Descrição || 'Ver Arquivo'}
+                            </div>
+                            <span style="color: var(--p-med); flex-shrink: 0;">🔗</span>
                         </a>`).join('');
                 } else {
                     const grps = {};
@@ -244,20 +250,31 @@
                         grps[g].push(formatarNome(i["Integrantes"]));
                     });
                     conteudoInterno = Object.keys(grps).map(g => `
-                        <details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px;">
-                            <summary style="padding:10px; font-size:0.9em; font-weight:bold; cursor:pointer;">${g} <small style="float:right">${grps[g].length} ▾</small></summary>
-                            <ul class="lista-integrantes" style="font-size:0.85em; list-style:circle; padding-bottom:10px;">${grps[g].map(n => `<li>${n}</li>`).join('')}</ul>
+                        <details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px; width: 100%;">
+                            <summary style="padding:12px; font-size:0.9em; font-weight:bold; cursor:pointer; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="text-align: left;">${g}</span>
+                                <small style="color: #888;">${grps[g].length} ▾</small>
+                            </summary>
+                            <ul class="lista-integrantes" style="font-size:0.85em; list-style:circle; padding: 0 15px 15px 35px; margin: 0; text-align: left;">
+                                ${grps[g].map(n => `<li style="margin-bottom: 5px;">${n}</li>`).join('')}
+                            </ul>
                         </details>`).join('');
                 }
 
-                det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding: 10px;">${conteudoInterno}</div>`;
+                det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding: 12px; display: block; width: 100%; box-sizing: border-box;">${conteudoInterno}</div>`;
                 corpo.appendChild(det);
             }
         } else {
+            // Lógica para Grade e Avisos
             itens.slice().reverse().forEach(item => {
                 const div = document.createElement('div');
-                div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
-                div.innerHTML = `<b>${item.Matéria || item.Nome || item.Titulo || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || item.Mensagem || ''}</small>`;
+                div.style.padding = "15px"; 
+                div.style.borderBottom = "1px solid var(--shadow)";
+                div.style.textAlign = "left";
+                div.innerHTML = `
+                    <div style="font-weight: bold; color: var(--p-med);">${item.Matéria || item.Nome || item.Titulo || ''}</div>
+                    <div style="font-size: 0.9em; color: var(--text-color); margin-top: 4px;">${item.Horário || item.Descrição || item.Mensagem || ''}</div>
+                `;
                 corpo.appendChild(div);
             });
         }
@@ -301,3 +318,4 @@
 <div class="footer-creditos">Desenvolvido por João Vitor Fróis Sanchez</div>
 </body>
 </html>
+
