@@ -73,43 +73,18 @@
         .materia-sumario::after { content: '📁'; font-size: 1.1em; }
         .materia-retratil[open] .materia-sumario::after { content: '📂'; }
 
-        /* ESTILO DO BOTÃO FORA DAS ABAS */
-        .btn-sugestao {
-            display: block; 
-            width: 100%; 
-            margin: 30px auto 10px auto; 
-            padding: 12px; 
-            background: transparent;
-            border: 1px dashed var(--p-med); 
-            color: var(--p-med); 
-            border-radius: 10px;
-            text-align: center; 
-            text-decoration: none; 
-            font-size: 0.85em; 
-            font-weight: 600;
-        }
+        /* ESTILOS AULAS ONLINE */
+        .link-aula-card { background: var(--input-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid #28a745; text-align: left; }
+        .link-aula-header { font-size: 0.75em; font-weight: bold; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        .btn-entrar-aula { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.9em; width: 100%; text-align: center; }
 
+        .btn-sugestao { display: block; width: 100%; margin: 30px auto 10px auto; padding: 12px; background: transparent; border: 1px dashed var(--p-med); color: var(--p-med); border-radius: 10px; text-align: center; text-decoration: none; font-size: 0.85em; font-weight: 600; }
         .arquivo-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: var(--text-color); width: 100%; box-sizing: border-box; }
         ul.lista-integrantes { padding: 0 15px 15px 35px !important; margin: 0 !important; list-style-type: circle; border-left: 3px solid var(--p-med); margin-left: 15px !important; text-align: left; }
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--shadow); }
-        .footer-creditos {
-            text-align: center;
-            font-size: 11px;
-            color: #888;
-            padding-bottom: 40px; 
-            margin-top: 50px;     
-            width: 100%;
-            font-style: italic;
-            opacity: 0.8;
-            cursor: default;
-        }
-
-        /* O NOME VAI FICANDO AZUL ENQUANTO VOCÊ SEGURA */
-        .footer-creditos:active {
-            transition: color 5s linear;
-            color: var(--p-med);
-        }    
+        .footer-creditos { text-align: center; font-size: 11px; color: #888; padding-bottom: 40px; margin-top: 50px; width: 100%; font-style: italic; opacity: 0.8; }
+        
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); }
         .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
     </style>
@@ -128,9 +103,11 @@
     <h2 id="tituloPrincipal" style="margin:0;">Medicina - Turma H</h2>
     <div id="status-bar"></div>
 </div>
-<div id="offline-pwa-msg" style="display:none; background:#ff9500; color:white; font-size:12px; padding:8px 15px; border-radius:30px; margin: 10px auto 20px auto; font-weight:bold; width: fit-content; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+
+<div id="offline-pwa-msg" style="display:none; background:#ff9500; color:white; font-size:12px; padding:8px 15px; border-radius:30px; margin: 10px auto 20px auto; font-weight:bold; width: fit-content; text-align: center;">
     ⚠️ Você está offline. Exibindo dados salvos.
 </div>
+
 <div class="grid-container">
     <div class="card" onclick="mostrarAba('Grade')"><span class="icon">📅</span><span class="label">Grade</span></div>
     <div class="card" onclick="mostrarAba('Grupos')"><span class="icon">👥</span><span class="label">Grupos</span></div>
@@ -139,6 +116,11 @@
         <span class="icon">🔔</span><span class="label">Avisos</span>
     </div>
     <div class="card" onclick="mostrarAba('Arquivos')"><span class="icon">📄</span><span class="label">Arquivos</span></div>
+    
+    <div class="card" id="btnOnline" onclick="mostrarAba('Links')" style="grid-column: span 2; height: 80px; flex-direction: row; gap: 15px;">
+        <span class="icon">💻</span>
+        <span class="label">Aulas Online</span>
+    </div>
 </div>
 
 <div id="meuModal" class="modal">
@@ -180,6 +162,20 @@
     let touchEnd = 0;
     const indicator = document.getElementById('refresh-indicator');
 
+    // --- LOGICA DE SEGURAR 5 SEGUNDOS ---
+    const configSegredo = (elemento) => {
+        elemento.addEventListener('touchstart', () => { timerAdmin = setTimeout(abrirAdmin, 5000); });
+        elemento.addEventListener('mousedown', () => { timerAdmin = setTimeout(abrirAdmin, 5000); });
+        elemento.addEventListener('touchend', () => clearTimeout(timerAdmin));
+        elemento.addEventListener('mouseup', () => clearTimeout(timerAdmin));
+    };
+
+    configSegredo(document.getElementById('meuNomeSegredo'));
+    configSegredo(document.getElementById('btnOnline'));
+
+    function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
+    function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
+
     // --- PULL TO REFRESH ---
     window.addEventListener('touchstart', (e) => { touchStart = e.targetTouches[0].pageY; }, { passive: true });
     window.addEventListener('touchmove', (e) => {
@@ -189,8 +185,7 @@
     }, { passive: true });
 
     window.addEventListener('touchend', async () => {
-        const distance = touchEnd - touchStart;
-        if (window.scrollY <= 0 && distance > 80) {
+        if ((touchEnd - touchStart) > 80 && window.scrollY <= 0) {
             indicator.innerText = "🔄 Atualizando...";
             await carregarDados();
             indicator.innerText = "✅ Atualizado!";
@@ -199,122 +194,23 @@
         touchStart = 0; touchEnd = 0;
     });
 
-    // --- SEGREDO NO NOME (5 SEGUNDOS) - FUNCIONA EM CELULAR E PC ---
-    const linkCreditos = document.getElementById('meuNomeSegredo');
-
-    // Função para iniciar o contador
-    const iniciarTimer = () => {
-        timerAdmin = setTimeout(abrirAdmin, 5000);
-    };
-
-    // Função para cancelar o contador
-    const cancelarTimer = () => {
-        clearTimeout(timerAdmin);
-    };
-
-    // Eventos para Celular (Touch)
-    linkCreditos.addEventListener('touchstart', (e) => {
-        // e.preventDefault(); // Opcional: evita comportamentos padrão do navegador
-        iniciarTimer();
-    });
-    linkCreditos.addEventListener('touchend', cancelarTimer);
-
-    // Eventos para Computador (Mouse)
-    linkCreditos.addEventListener('mousedown', iniciarTimer);
-    linkCreditos.addEventListener('mouseup', cancelarTimer);
-    linkCreditos.addEventListener('mouseleave', cancelarTimer); // Cancela se o mouse sair de cima do nome
-    function abrirAdmin() { document.getElementById('modalAdmin').style.display = "flex"; }
-    function fecharAdmin() { document.getElementById('modalAdmin').style.display = "none"; }
-
-    async function enviarAviso() {
-        const senha = document.getElementById('adminSenha').value;
-        const status = document.getElementById('statusEnvio');
-        status.innerText = "Enviando... ⏳";
-        try {
-            const response = await fetch(URL_API, { 
-                method: 'POST', 
-                body: JSON.stringify({ senha, titulo: document.getElementById('avisoTitulo').value, mensagem: document.getElementById('avisoTexto').value }) 
-            });
-            const resultado = await response.text();
-            if (resultado === "Sucesso") {
-                status.innerText = "✅ Postado!";
-                setTimeout(() => { fecharAdmin(); carregarDados(); }, 2000);
-            } else { status.innerText = "❌ Senha incorreta!"; }
-        } catch (e) { status.innerText = "❌ Erro!"; }
-    }
-
-    function formatarNome(texto) {
-        if(!texto) return "";
-        return texto.toString().toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-    }
-
     async function carregarDados() {
         const msgOffline = document.getElementById('offline-pwa-msg');
         try {
             const res = await fetch(URL_API);
             dadosApp = await res.json();
-            
-            // Se chegou aqui, a internet está OK
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             document.getElementById('status-bar').innerHTML = `<span style="color:#5cb85c; font-weight:bold">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
-            if(msgOffline) msgOffline.style.display = 'none'; // Esconde o aviso se a internet voltou
-            
+            if(msgOffline) msgOffline.style.display = 'none';
             verificarNovosAvisos();
         } catch (e) {
             const cache = localStorage.getItem('cache_medicina');
             if(cache) {
                 dadosApp = JSON.parse(cache);
-                if(msgOffline) msgOffline.style.display = 'block'; // Mostra a pílula laranja centralizada
-                document.getElementById('status-bar').innerHTML = `<span style="color:#888;">Exibindo versão offline</span>`;
+                if(msgOffline) msgOffline.style.display = 'block';
+                document.getElementById('status-bar').innerHTML = `<span style="color:#888;">Versão offline</span>`;
             }
         }
-    }
-
-    function verificarNovosAvisos() {
-        if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
-            if(localStorage.getItem('ultimo_id_aviso_lido') !== idAvisoAtual) document.getElementById('badge-avisos').style.display = 'block';
-        }
-    }
-
-    function abrirAvisos() {
-        mostrarAba('Avisos');
-        if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            localStorage.setItem('ultimo_id_aviso_lido', btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || "")))));
-            document.getElementById('badge-avisos').style.display = 'none';
-        }
-    }
-
-    // --- FUNÇÃO DE BUSCA PARA GRUPOS ---
-    function filtrarGrupos() {
-        const termo = document.getElementById('inputBuscaGrupo').value.toLowerCase();
-        const materias = document.querySelectorAll('.materia-retratil');
-
-        materias.forEach(materia => {
-            const grupos = materia.querySelectorAll('.grupo-detalhe');
-            let materiaTemMatch = false;
-
-            grupos.forEach(grupo => {
-                const nomes = grupo.getAttribute('data-nomes') || "";
-                if (nomes.includes(termo)) {
-                    grupo.style.display = "block";
-                    materiaTemMatch = true;
-                } else {
-                    grupo.style.display = "none";
-                }
-            });
-
-            materia.style.display = materiaTemMatch ? "block" : "none";
-            
-            // Abre a pasta da matéria se houver busca, senão fecha
-            if (termo.length > 0 && materiaTemMatch) {
-                materia.open = true;
-            } else if (termo.length === 0) {
-                materia.open = false;
-            }
-        });
     }
 
     function mostrarAba(nomeAba) {
@@ -324,106 +220,51 @@
         corpo.innerHTML = "";
         let itens = dadosApp[nomeAba] || [];
 
-        if (nomeAba === "Grade" || nomeAba === "Arquivos" || nomeAba === "Grupos") {
-            const estrutura = {};
-            
-            if (nomeAba === "Grupos") {
-                const buscaHTML = `
-                    <div style="position: sticky; top: -20px; background: var(--card-bg); padding: 10px 0; z-index: 10; margin-bottom: 15px;">
-                        <input type="text" id="inputBuscaGrupo" placeholder="🔍 Digite seu nome..." 
-                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--p-med); background: var(--input-bg); color: var(--text-color); font-size: 16px;"
-                            oninput="filtrarGrupos()">
+        if (nomeAba === "Links") {
+            if (itens.length === 0) {
+                corpo.innerHTML = "<p style='color:#888; text-align:center;'>Nenhuma aula online agendada.</p>";
+            } else {
+                corpo.innerHTML = itens.map(link => `
+                    <div class="link-aula-card">
+                        <div class="link-aula-header">📅 ${link.Data || ''} • ${link.Horario || ''}</div>
+                        <div style="font-weight:bold; font-size: 1.1em; margin-bottom: 5px;">${link.Materia || 'Aula Online'}</div>
+                        <div style="font-size: 0.85em; opacity: 0.8; margin-bottom: 10px;">${link.Descricao || ''}</div>
+                        <a href="${link.Url}" target="_blank" class="btn-entrar-aula">▶️ Entrar na Sala</a>
                     </div>
-                    <div id="container-lista-dinamica"></div>
-                `;
-                corpo.innerHTML = buscaHTML;
+                `).join('');
             }
-
-            if (nomeAba === "Grade") {
-                const ordemDias = {
-                    "Segunda-Feira / Lunes": 1, "Terça-Feira / Martes": 2, "Quarta-Feira / Miércoles": 3,
-                    "Quinta-Feira / Jueves": 4, "Sexta-Feira / Viernes": 5, "Sábado / Sábado": 6
-                };
-                itens.sort((a, b) => {
-                    let ordemA = ordemDias[a["Dia da Semana"]] || 99;
-                    let ordemB = ordemDias[b["Dia da Semana"]] || 99;
-                    if (ordemA !== ordemB) return ordemA - ordemB;
-                    return (a.Horários || "").localeCompare(b.Horários || "");
-                });
+        } else if (nomeAba === "Grade" || nomeAba === "Arquivos" || nomeAba === "Grupos") {
+            const estrutura = {};
+            if (nomeAba === "Grupos") {
+                corpo.innerHTML = `<div style="position: sticky; top: -20px; background: var(--card-bg); padding: 10px 0; z-index: 10; margin-bottom: 15px;"><input type="text" id="inputBuscaGrupo" placeholder="🔍 Digite seu nome..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--p-med); background: var(--input-bg); color: var(--text-color);" oninput="filtrarGrupos()"></div><div id="container-lista-dinamica"></div>`;
             }
-
             itens.forEach(item => {
-                let cat;
-                if (nomeAba === "Grade") cat = item["Dia da Semana"] || "Outros";
-                else if (nomeAba === "Arquivos") cat = item.Nome || "Geral";
-                else cat = formatarNome(item["Matéria"] || "Geral");
+                let cat = (nomeAba === "Grade") ? (item["Dia da Semana"] || "Outros") : (nomeAba === "Arquivos" ? (item.Nome || "Geral") : formatarNome(item["Matéria"] || "Geral"));
                 if (!estrutura[cat]) estrutura[cat] = [];
                 estrutura[cat].push(item);
             });
-
             const alvo = (nomeAba === "Grupos") ? document.getElementById('container-lista-dinamica') : corpo;
-
             Object.keys(estrutura).forEach(cat => {
                 const det = document.createElement('details');
                 det.className = 'materia-retratil';
-                
-                det.addEventListener('toggle', function() {
-                    if (this.open) {
-                        alvo.querySelectorAll('.materia-retratil').forEach(o => { if (o !== this) o.open = false; });
-                    }
-                });
-
                 let conteudoInterno = "";
                 if (nomeAba === "Grade") {
-                    conteudoInterno = estrutura[cat].map(aula => `
-                        <div class="grade-item">
-                            <div class="grade-hora">${aula.Horários || '--:--'}</div>
-                            <div class="grade-info">
-                                <span class="grade-materia">${aula.Matéria || 'Sem Nome'}</span>
-                                <span class="grade-grupo">👥 ${aula.Grupo || 'Todos'}</span>
-                            </div>
-                        </div>`).join('');
+                    conteudoInterno = estrutura[cat].map(aula => `<div class="grade-item"><div class="grade-hora">${aula.Horários || '--:--'}</div><div class="grade-info"><span class="grade-materia">${aula.Matéria || 'Sem Nome'}</span><span class="grade-grupo">👥 ${aula.Grupo || 'Todos'}</span></div></div>`).join('');
                 } else if (nomeAba === "Arquivos") {
-                    conteudoInterno = estrutura[cat].map(arq => {
-                        const temLink = arq.Link && arq.Link.trim() !== "" && arq.Link.startsWith('http');
-                        if (temLink) {
-                            return `
-                                <a href="${arq.Link}" target="_blank" class="arquivo-item">
-                                    <div style="font-size: 0.95em; font-weight: 500; text-align: left; flex: 1; padding-right: 10px; word-break: break-word;">${arq.Descrição || 'Ver Arquivo'}</div>
-                                    <span style="color: var(--p-med); flex-shrink: 0;">🔗</span>
-                                </a>`;
-                        } else {
-                            return `
-                                <div class="arquivo-item" style="opacity: 0.6; cursor: default; border-style: dashed;">
-                                    <div style="font-size: 0.95em; font-weight: 500; text-align: left; flex: 1; padding-right: 10px; word-break: break-word;">${arq.Descrição || 'Arquivo indisponível'}</div>
-                                    <span style="font-size: 0.8em;">⏳</span>
-                                </div>`;
-                        }
-                    }).join('');
+                    conteudoInterno = estrutura[cat].map(arq => `<a href="${arq.Link}" target="_blank" class="arquivo-item"><span>${arq.Descrição || 'Ver Arquivo'}</span><span style="color:var(--p-med)">🔗</span></a>`).join('');
                 } else {
                     const grps = {};
-                    estrutura[cat].forEach(i => {
-                        const g = formatarNome(i["Nome do Grupo"] || "Sem Nome");
-                        if(!grps[g]) grps[g] = [];
-                        grps[g].push(formatarNome(i["Integrantes"]));
-                    });
-                    conteudoInterno = Object.keys(grps).map(g => `
-                        <details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px; width: 100%;" data-nomes="${grps[g].join(',').toLowerCase()}">
-                            <summary style="padding:12px; font-size:0.9em; font-weight:bold; cursor:pointer; display: flex; justify-content: space-between; align-items: center; text-align: left;">
-                                <span>${g}</span> <small style="color: #888; margin-left:10px;">${grps[g].length} ▾</small>
-                            </summary>
-                            <ul class="lista-integrantes">${grps[g].map(n => `<li>${n}</li>`).join('')}</ul>
-                        </details>`).join('');
+                    estrutura[cat].forEach(i => { const g = formatarNome(i["Nome do Grupo"]); if(!grps[g]) grps[g] = []; grps[g].push(formatarNome(i["Integrantes"])); });
+                    conteudoInterno = Object.keys(grps).map(g => `<details class="grupo-detalhe" style="margin-bottom:10px; border:1px solid var(--shadow); border-radius:8px;"><summary style="padding:12px; font-weight:bold; display:flex; justify-content:space-between;"><span>${g}</span> <small>${grps[g].length} ▾</small></summary><ul class="lista-integrantes">${grps[g].map(n => `<li>${n}</li>`).join('')}</ul></details>`).join('');
                 }
-
-                det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding: 12px; box-sizing: border-box;">${conteudoInterno}</div>`;
+                det.innerHTML = `<summary class="materia-sumario"><span>${cat}</span></summary><div style="padding:12px;">${conteudoInterno}</div>`;
                 alvo.appendChild(det);
             });
         } else {
             itens.slice().reverse().forEach(item => {
                 const div = document.createElement('div');
-                div.style.padding = "15px"; div.style.borderBottom = "1px solid var(--shadow)"; div.style.textAlign = "left";
-                div.innerHTML = `<div style="font-weight: bold; color: var(--p-med);">${item.Titulo || ''}</div><div style="font-size: 0.9em; color: var(--text-color); margin-top: 4px;">${item.Mensagem || ''}</div>`;
+                div.style.padding = "15px"; div.style.borderBottom = "1px solid var(--shadow)";
+                div.innerHTML = `<div style="font-weight:bold; color:var(--p-med);">${item.Titulo || ''}</div><div style="font-size:0.9em; margin-top:4px;">${item.Mensagem || ''}</div>`;
                 corpo.appendChild(div);
             });
         }
@@ -431,6 +272,7 @@
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = "none"; }
+    function formatarNome(t) { return t ? t.toString().toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase()) : ""; }
     function toggleTheme() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
@@ -444,21 +286,8 @@
             document.documentElement.setAttribute('data-theme', 'dark');
             document.getElementById('theme-icon').innerText = '🌙';
         }
-        setTimeout(() => {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('theme-toggle').style.display = 'flex';
-        }, 1500);
+        setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('theme-toggle').style.display = 'flex'; }, 1500);
     });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
