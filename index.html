@@ -80,6 +80,21 @@
         .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--shadow); background: var(--input-bg); color: var(--text-color); font-family: inherit; }
         .btn-postar { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         #statusEnvio { text-align: center; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
+
+        .arquivo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin: 5px 0;
+    background: var(--input-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.2s;
+}
+.arquivo-item:active { transform: scale(0.98); }
+.arquivo-link-icon { color: var(--p-med); font-size: 1.2em; }
     </style>
 </head>
 <body>
@@ -236,57 +251,64 @@
     }
 
     function mostrarAba(nomeAba) {
-        const modal = document.getElementById('meuModal');
-        const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = nomeAba;
-        corpo.innerHTML = "";
-        let itens = dadosApp[nomeAba] || [];
+    const modal = document.getElementById('meuModal');
+    const corpo = document.getElementById('modal-corpo');
+    document.getElementById('modal-titulo').innerText = nomeAba;
+    corpo.innerHTML = "";
+    let itens = dadosApp[nomeAba] || [];
 
-        if(nomeAba === "Grupos") {
-            corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar..." oninput="filtrarGrupos()"></div>`;
-            const estrutura = {}; 
-            itens.forEach(item => {
-                const mat = formatarNome(item["Matéria"] || "Geral");
-                const grp = formatarNome(item["Nome do Grupo"] || "Sem Grupo");
-                if(!estrutura[mat]) estrutura[mat] = {};
-                if(!estrutura[mat][grp]) estrutura[mat][grp] = [];
-                if(item["Integrantes"]) estrutura[mat][grp].push(formatarNome(item["Integrantes"]));
-            });
-            for (let mat in estrutura) {
-                const matDet = document.createElement('details');
-                matDet.className = 'materia-retratil';
-                matDet.innerHTML = `<summary class="materia-sumario"><span>${mat}</span></summary><div class="container-grupos"></div>`;
-                const container = matDet.querySelector('.container-grupos');
-                for (let grp in estrutura[mat]) {
-                    const grpDet = document.createElement('details');
-                    grpDet.className = 'grupo-detalhe';
-                    grpDet.innerHTML = `<summary class="grupo-sumario"><span>${grp}</span><small style="color:#888;">${estrutura[mat][grp].length} ▾</small></summary><ul class="lista-integrantes">${estrutura[mat][grp].map(n => `<li>${n}</li>`).join('')}</ul>`;
-                    container.appendChild(grpDet);
+    if (nomeAba === "Arquivos") {
+        // Agrupar por "Nome" (ex: Guia Histologia, Guia Anatomia)
+        const estrutura = {};
+        itens.forEach(item => {
+            const categoria = item.Nome || "Geral";
+            if (!estrutura[categoria]) estrutura[categoria] = [];
+            estrutura[categoria].push(item);
+        });
+
+        for (let categoria in estrutura) {
+            const det = document.createElement('details');
+            det.className = 'materia-retratil';
+            // Lógica de fechar os outros ao abrir um
+            det.addEventListener('toggle', function() {
+                if (this.open) {
+                    document.querySelectorAll('.materia-retratil').forEach(d => {
+                        if (d !== this) d.open = false;
+                    });
                 }
-                corpo.appendChild(matDet);
-            }
-        } else {
-            itens.slice().reverse().forEach(item => {
-                const div = document.createElement('div');
-                div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
-                if(nomeAba === "Avisos") {
-                    let dataFormatada = "";
-                    if (item.Data) {
-                        let d = item.Data.toString();
-                        if (d.includes("T")) {
-                            let partes = d.split("T")[0].split("-");
-                            dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                        } else { dataFormatada = d.substring(0, 10); }
-                    }
-                    div.innerHTML = `<small style="color:#888">${dataFormatada}</small><br><b style="color:var(--p-med)">${item.Titulo || 'Aviso'}</b><p style="margin:5px 0; font-size:0.9em">${item.Mensagem || ''}</p>`;
-                } else {
-                    div.innerHTML = `<b>${item.Matéria || item.Nome || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || ''}</small>`;
-                }
-                corpo.appendChild(div);
             });
+
+            det.innerHTML = `
+                <summary class="materia-sumario"><span>${categoria}</span></summary>
+                <div style="padding: 10px;">
+                    ${estrutura[categoria].map(arq => `
+                        <a href="${arq.Link}" target="_blank" class="arquivo-item">
+                            <div>
+                                <strong>Abrir Material</strong><br>
+                                <small style="color:#888">${arq.Descrição || ''}</small>
+                            </div>
+                            <span class="arquivo-link-icon">🔗</span>
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+            corpo.appendChild(det);
         }
-        modal.style.display = "flex";
+    } 
+    else if (nomeAba === "Grupos") {
+        // ... (mantenha sua lógica de grupos aqui, mas adicione a função de fechar os outros)
+        // Dica: Adicione o mesmo eventListener de 'toggle' nos detalhes dos grupos
+    } else {
+        // ... (resto da lógica de Avisos e Grade)
+        itens.slice().reverse().forEach(item => {
+            const div = document.createElement('div');
+            div.style.padding = "15px 0"; div.style.borderBottom = "1px solid var(--shadow)";
+            div.innerHTML = `<b>${item.Matéria || item.Nome || item.Titulo || ''}</b><br><small style="color:#888">${item.Horário || item.Descrição || item.Mensagem || ''}</small>`;
+            corpo.appendChild(div);
+        });
     }
+    modal.style.display = "flex";
+}
 
     function filtrarGrupos() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
@@ -322,3 +344,4 @@
 </script>
 </body>
 </html>
+
