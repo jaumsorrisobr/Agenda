@@ -35,19 +35,18 @@
         
         /* Estilos de Lista e Grade */
         .secao-retratil { margin-bottom: 12px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--shadow); overflow: hidden; }
-        .secao-titulo { background: rgba(0,123,255,0.12); color: var(--p-med); padding: 14px 18px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .secao-titulo { background: rgba(0,123,255,0.12); color: var(--p-med); padding: 14px 18px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+        .secao-titulo::-webkit-details-marker { display: none; }
 
         .grade-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid rgba(128,128,128,0.1); }
-        .grade-item:last-child { border-bottom: none; }
         .grade-hora { flex: 0 0 110px; color: #fff; font-weight: 800; font-size: 0.75em; text-align: center; background: var(--p-med); padding: 5px; border-radius: 6px; }
         .grade-info { flex: 1; text-align: left; }
-        .grade-nome { font-weight: bold; font-size: 0.95em; display: block; color: var(--text-color); }
-        .grade-grupo { font-size: 0.75em; opacity: 0.6; }
-
-        /* Arquivos - Forçando alinhamento à esquerda */
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); width: 100%; }
-        .arquivo-nome { font-weight: bold; text-align: left; flex: 1; display: block; }
-        .link-vazio { color: #ffa500; font-size: 0.75em; font-style: italic; font-weight: normal; margin-left: 10px; white-space: nowrap; }
+        .grade-nome { font-weight: bold; font-size: 0.95em; display: block; }
+        
+        /* Arquivos */
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 12px; margin: 8px 0; text-decoration: none; color: var(--text-color); }
+        .arquivo-nome { font-weight: bold; text-align: left; flex: 1; }
+        .link-vazio { color: #ffa500; font-size: 0.75em; font-style: italic; margin-left: 10px; }
         
         .search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--p-med); background: var(--input-bg); color: var(--text-color); margin-bottom: 15px; }
 
@@ -103,6 +102,26 @@
     let dadosApp = {};
     let timerAdmin;
 
+    // Função para fechar outros detalhes (Efeito Sanfona Manual para iPhone)
+    function setupAccordion(grupo) {
+        const detalhes = document.querySelectorAll(`details[name="${grupo}"]`);
+        detalhes.forEach(targetDetail => {
+            targetDetail.addEventListener("click", () => {
+                detalhes.forEach(detail => {
+                    if (detail !== targetDetail) detail.removeAttribute("open");
+                });
+            });
+        });
+    }
+
+    // Formata Data para DD/MM/AAAA
+    function formatarDataBR(dataStr) {
+        if(!dataStr) return "";
+        const d = new Date(dataStr);
+        if(isNaN(d.getTime())) return dataStr; // Se não for data válida, retorna o texto original
+        return d.toLocaleDateString('pt-BR');
+    }
+
     const btnAdmin = document.getElementById('btnAdmin');
     ['touchstart', 'mousedown'].forEach(evt => btnAdmin.addEventListener(evt, () => timerAdmin = setTimeout(() => document.getElementById('modalAdmin').style.display='flex', 5000)));
     ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAdmin.addEventListener(evt, () => clearTimeout(timerAdmin)));
@@ -120,25 +139,14 @@
         }
     }
 
-    // --- GRADE (ORDENADA POR DIA DA SEMANA) ---
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
         corpo.innerHTML = "";
-        
         const itens = dadosApp["Grade"] || [];
-        
-        // Referência de ordem para o código saber quem vem primeiro
         const ordemReferencia = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-
-        // Pegamos os dias que existem na planilha
-        const diasDaPlanilha = [...new Set(itens.map(a => a["Dia da Semana"]))];
-
-        // Ordenamos os dias da planilha baseados na nossa lista de referência
-        diasDaPlanilha.sort((a, b) => {
-            const indexA = ordemReferencia.findIndex(dia => a.includes(dia));
-            const indexB = ordemReferencia.findIndex(dia => b.includes(dia));
-            return indexA - indexB;
+        const diasDaPlanilha = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a, b) => {
+            return ordemReferencia.findIndex(dia => a.includes(dia)) - ordemReferencia.findIndex(dia => b.includes(dia));
         });
 
         diasDaPlanilha.forEach(dia => {
@@ -148,67 +156,31 @@
                     <div class="grade-hora">${a["Horários"] || '--:--'}</div>
                     <div class="grade-info">
                         <span class="grade-nome">${a["Matéria"]}</span>
-                        <span class="grade-grupo">👥 ${a["Grupo"] || 'Geral'}</span>
+                        <span class="grade-grupo" style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span>
                     </div>
-                </div>
-            `).join('');
-
-            corpo.innerHTML += `
-                <details class="secao-retratil" name="grade-sanfona">
-                    <summary class="secao-titulo">${dia} <span>▾</span></summary>
-                    <div>${htmlAulas}</div>
-                </details>`;
+                </div>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil" name="grade">
+                <summary class="secao-titulo">${dia} <span>▾</span></summary>
+                <div>${htmlAulas}</div>
+            </details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
+        setupAccordion("grade");
     }
 
-    // --- GRUPOS ---
-    function abrirGrupos() {
+    function abrirAvisos() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Grupos";
-        corpo.innerHTML = `
-            <input type="text" class="search-box" id="inputBusca" placeholder="🔍 Buscar aluno ou grupo..." onkeyup="filtrarGrupos()">
-            <div id="container-grupos"></div>`;
-        renderizarGrupos(dadosApp["Grupos"] || []);
+        document.getElementById('modal-titulo').innerText = "Avisos";
+        const itens = dadosApp["Avisos"] || [];
+        corpo.innerHTML = itens.slice().reverse().map(i => `
+            <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);">
+                <div style="font-size: 0.75em; color: #888; margin-bottom: 2px;">${formatarDataBR(i["Data"])}</div>
+                <div style="font-weight: 800; color: var(--p-med); font-size: 0.85em; margin-bottom: 8px; text-transform: uppercase;">${i["Titulo"]}</div>
+                <div style="font-size: 1em; line-height: 1.4; white-space: pre-wrap;">${String(i["Mensagem"] || "")}</div>
+            </div>`).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
-    function renderizarGrupos(lista) {
-        const container = document.getElementById('container-grupos');
-        container.innerHTML = "";
-        const materias = [...new Set(lista.map(i => i["Matéria"]))];
-
-        materias.forEach(mat => {
-            const gruposMat = lista.filter(i => i["Matéria"] === mat);
-            const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
-            
-            let htmlGrupos = nomesG.map(ng => {
-                const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `
-                    <details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;">
-                        <summary style="padding:10px; cursor:pointer; font-size:0.9em;">${ng}</summary>
-                        <ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul>
-                    </details>`;
-            }).join('');
-
-            container.innerHTML += `
-                <details class="secao-retratil" name="grupos-sanfona">
-                    <summary class="secao-titulo">${mat} <span>▾</span></summary>
-                    <div style="padding:10px;">${htmlGrupos}</div>
-                </details>`;
-        });
-    }
-
-    function filtrarGrupos() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
-        const filtrados = (dadosApp["Grupos"] || []).filter(g => 
-            String(g["Integrantes"]).toLowerCase().includes(termo) || 
-            String(g["Nome do Grupo"]).toLowerCase().includes(termo)
-        );
-        renderizarGrupos(filtrados);
-    }
-
-    // --- ARQUIVOS (TEXTO FIXO À ESQUERDA) ---
     function abrirArquivos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Arquivos";
@@ -220,44 +192,40 @@
             const links = itens.filter(i => i["Nome"] === n);
             let html = links.map(a => {
                 const temLink = a["Links"] && String(a["Links"]).includes("http");
-                if(temLink) {
-                    return `<a href="${a["Links"]}" target="_blank" class="item-lista">
-                                <span class="arquivo-nome">${a["Descrição"]}</span>
-                                <span style="font-size: 1.2em;">📂</span>
-                            </a>`;
-                } else {
-                    return `<div class="item-lista">
-                                <span class="arquivo-nome">${a["Descrição"]}</span>
-                                <span class="link-vazio">⏳ Aguardando links</span>
-                            </div>`;
-                }
+                return `<${temLink ? 'a href="'+a["Links"]+'" target="_blank"' : 'div'} class="item-lista">
+                    <span class="arquivo-nome">${a["Descrição"]}</span>
+                    ${temLink ? '<span>📂</span>' : '<span class="link-vazio">⏳ Aguardando links</span>'}
+                </${temLink ? 'a' : 'div'}>`;
             }).join('');
-            corpo.innerHTML += `<details class="secao-retratil" name="arquivos-sanfona"><summary class="secao-titulo">${n} ▾</summary><div style="padding:5px 10px;">${html}</div></details>`;
+            corpo.innerHTML += `<details class="secao-retratil" name="arqs"><summary class="secao-titulo">${n} <span>▾</span></summary><div style="padding:5px 10px;">${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
+        setupAccordion("arqs");
     }
 
-    // --- AVISOS (DATA CINZA EM CIMA, TÍTULO PEQUENO, QUEBRA DE LINHA) ---
-    function abrirAvisos() {
+    function abrirGrupos() {
         const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Avisos";
-        const itens = dadosApp["Avisos"] || [];
-        
-        corpo.innerHTML = itens.slice().reverse().map(i => {
-            const dataPura = String(i["Data"] || "");
-            const dataCompacta = dataPura.length > 5 ? dataPura.substring(0, 5) : dataPura;
-            
-            // Substitui quebras de linha manuais por <br>
-            const mensagemFormatada = String(i["Mensagem"] || "").replace(/\n/g, '<br>');
-
-            return `
-            <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);">
-                <div style="font-size: 0.7em; color: #888; margin-bottom: 2px;">${dataCompacta}</div>
-                <div style="font-weight: 800; color: var(--p-med); font-size: 0.85em; margin-bottom: 8px; text-transform: uppercase;">${i["Titulo"]}</div>
-                <div style="font-size: 1em; line-height: 1.4; white-space: pre-wrap;">${mensagemFormatada}</div>
-            </div>`;
-        }).join('');
+        document.getElementById('modal-titulo').innerText = "Grupos";
+        corpo.innerHTML = `<div id="container-grupos"></div>`;
+        const lista = dadosApp["Grupos"] || [];
+        const materias = [...new Set(lista.map(i => i["Matéria"]))];
+        materias.forEach(mat => {
+            const gruposMat = lista.filter(i => i["Matéria"] === mat);
+            const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
+            let htmlGrupos = nomesG.map(ng => {
+                const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
+                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;">
+                    <summary style="padding:10px; font-size:0.9em;">${ng}</summary>
+                    <ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul>
+                </details>`;
+            }).join('');
+            document.getElementById('container-grupos').innerHTML += `<details class="secao-retratil" name="gps">
+                <summary class="secao-titulo">${mat} <span>▾</span></summary>
+                <div style="padding:10px;">${htmlGrupos}</div>
+            </details>`;
+        });
         document.getElementById('meuModal').style.display = 'flex';
+        setupAccordion("gps");
     }
 
     function abrirLinks() {
@@ -269,8 +237,7 @@
                 <b style="color:var(--p-med);">${i["Materia"]}</b>
                 <small>🗓️ ${i["Data"]} às ${i["Horário"]}</small>
                 <a href="${i["Url"]}" target="_blank" style="background:#28a745; color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">ABRIR LINK</a>
-            </div>
-        `).join('');
+            </div>`).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
@@ -281,7 +248,6 @@
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '💡';
         localStorage.setItem('med_h_theme', n);
     }
-
     window.onload = () => {
         const t = localStorage.getItem('med_h_theme') || 'dark';
         document.body.setAttribute('data-theme', t);
