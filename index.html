@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Medicina - Turma H</title>
+    <title>Agenda Medicine - Turma H</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,6 +14,9 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 60px; }
+
+        /* AJUSTE PARA EVITAR ZOOM NO IOS */
+        input, textarea, button { font-size: 16px !important; }
 
         /* Splash */
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s ease; }
@@ -81,11 +84,29 @@
     </div>
 </div>
 
-<div id="modalAdmin" class="modal">
+<div id="modalLinkAdmin" class="modal">
     <div class="modal-content">
-        <button class="close-btn" onclick="fecharAdmin()">✕</button>
-        <h3 style="color:#28a745;">Painel Administrativo</h3>
-        <p>Acesso: <b>João Sanchez</b></p>
+        <button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+        <h3 style="color:#28a745;">Postar Aula Online</h3>
+        <input type="password" id="senhaLink" placeholder="Senha do Representante" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="dataLink" placeholder="Data (DD/MM/AAAA)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="horaLink" placeholder="Horário (HH:MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="materiaLink" placeholder="Matéria" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="urlLink" placeholder="Link (URL)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <button onclick="enviarDados('Links')" style="width:100%; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold;">ENVIAR AULA</button>
+        <div id="msgLink" style="margin-top:10px; text-align:center; font-weight:bold;"></div>
+    </div>
+</div>
+
+<div id="modalAvisoAdmin" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+        <h3 style="color:#ffc107;">Postar Novo Aviso</h3>
+        <input type="password" id="senhaAviso" placeholder="Senha do Representante" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <input type="text" id="tituloAviso" placeholder="Título do Aviso" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;">
+        <textarea id="textoAviso" placeholder="Mensagem do aviso..." rows="4" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white; font-family:sans-serif;"></textarea>
+        <button onclick="enviarDados('Avisos')" style="width:100%; padding:15px; background:#ffc107; color:black; border:none; border-radius:10px; font-weight:bold;">POSTAR AVISO</button>
+        <div id="msgAviso" style="margin-top:10px; text-align:center; font-weight:bold;"></div>
     </div>
 </div>
 
@@ -97,32 +118,43 @@
     const URL_API = "https://script.google.com/macros/s/AKfycbxDt1R5Gpu2aDY5dts6aDQcigKLx28ZxjmXynrvOvmGmvwaG86xBQmOABbn_BsKsUNP7A/exec";
     let dadosApp = {};
     let timerAdmin;
-    let timerPlanilha; // Variável global para o timer
+    let timerPlanilha;
 
-    function setupAccordion(grupo) {
-        const detalhes = document.querySelectorAll(`details[name="${grupo}"]`);
-        detalhes.forEach(targetDetail => {
-            targetDetail.onclick = (e) => {
-                detalhes.forEach(detail => {
-                    if (detail !== targetDetail) detail.removeAttribute("open");
-                });
-            };
-        });
-    }
+    // Configuração do gatilho de 5 segundos ao carregar
+    window.onload = () => {
+        carregarDados();
+        
+        // Timer Painel Aulas Online
+        const btnAulas = document.getElementById('btnAulasOnline');
+        const ligarTimerLink = () => {
+            timerPlanilha = setTimeout(() => {
+                document.getElementById('modalLinkAdmin').style.display = 'flex';
+            }, 5000);
+        };
+        btnAulas.addEventListener('touchstart', ligarTimerLink);
+        btnAulas.addEventListener('mousedown', ligarTimerLink);
+        btnAulas.addEventListener('touchend', () => clearTimeout(timerPlanilha));
+        btnAulas.addEventListener('mouseup', () => clearTimeout(timerPlanilha));
 
-    function formatarDataBR(dataStr) {
-        if(!dataStr) return "";
-        const d = new Date(dataStr);
-        if(isNaN(d.getTime())) return dataStr;
-        return d.toLocaleDateString('pt-BR');
-    }
+        // Timer Painel Avisos
+        const btnCreditos = document.getElementById('btnAdmin');
+        const ligarTimerAviso = () => {
+            timerAdmin = setTimeout(() => {
+                document.getElementById('modalAvisoAdmin').style.display = 'flex';
+            }, 5000);
+        };
+        btnCreditos.addEventListener('touchstart', ligarTimerAviso);
+        btnCreditos.addEventListener('mousedown', ligarTimerAviso);
+        btnCreditos.addEventListener('touchend', () => clearTimeout(timerAdmin));
+        btnCreditos.addEventListener('mouseup', () => clearTimeout(timerAdmin));
 
-    // Configuração Admin do Footer
-    const btnAdminDiv = document.getElementById('btnAdmin');
-    ['touchstart', 'mousedown'].forEach(evt => btnAdminDiv.addEventListener(evt, () => timerAdmin = setTimeout(() => document.getElementById('modalAdmin').style.display='flex', 5000)));
-    ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAdminDiv.addEventListener(evt, () => clearTimeout(timerAdmin)));
-    
-    function fecharAdmin() { document.getElementById('modalAdmin').style.display = 'none'; }
+        // Splash Timeout
+        setTimeout(() => {
+            const splash = document.getElementById('splash');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 800);
+        }, 2000);
+    };
 
     async function carregarDados() {
         try {
@@ -136,20 +168,45 @@
         }
     }
 
-    // Funções de Modal (Grade, Avisos, etc - Mesma lógica)
+    // Funções Gerais
+    function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
+    
+    function toggleTheme() {
+        const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', n);
+        document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '💡';
+        localStorage.setItem('med_h_theme', n);
+    }
+
+    function setupAccordion(grupo) {
+        const detalhes = document.querySelectorAll(`details[name="${grupo}"]`);
+        detalhes.forEach(targetDetail => {
+            targetDetail.onclick = () => {
+                detalhes.forEach(detail => { if (detail !== targetDetail) detail.removeAttribute("open"); });
+            };
+        });
+    }
+
+    function formatarDataBR(dataStr) {
+        if(!dataStr) return "";
+        const d = new Date(dataStr);
+        return isNaN(d.getTime()) ? dataStr : d.toLocaleDateString('pt-BR');
+    }
+
+    // Abertura de Seções
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
         corpo.innerHTML = "";
         const itens = dadosApp["Grade"] || [];
         const ordemReferencia = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-        const diasDaPlanilha = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a, b) => {
-            return ordemReferencia.findIndex(dia => a.includes(dia)) - ordemReferencia.findIndex(dia => b.includes(dia));
-        });
-        diasDaPlanilha.forEach(dia => {
+        const dias = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a, b) => 
+            ordemReferencia.findIndex(dia => a.includes(dia)) - ordemReferencia.findIndex(dia => b.includes(dia))
+        );
+        dias.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia);
-            let htmlAulas = aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"] || '--:--'}</div><div class="grade-info"><span style="font-weight:bold; font-size:0.95em; display:block;">${a["Matéria"]}</span><span style="font-size:0.7em; opacity:0.6;">👥 ${a["Grupo"] || 'Geral'}</span></div></div>`).join('');
-            corpo.innerHTML += `<details class="secao-retratil" name="grade"><summary class="secao-titulo">${dia} <span>▾</span></summary><div>${htmlAulas}</div></details>`;
+            let html = aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"]}</div><div class="grade-info"><b>${a["Matéria"]}</b><br><small>👥 ${a["Grupo"] || 'Geral'}</small></div></div>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil" name="grade"><summary class="secao-titulo">${dia} <span>▾</span></summary><div>${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
         setupAccordion("grade");
@@ -158,8 +215,8 @@
     function abrirAvisos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Avisos";
-        const itens = dadosApp["Avisos"] || [];
-        corpo.innerHTML = itens.slice().reverse().map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);"><div style="font-size: 0.75em; color: #888; margin-bottom: 2px;">${formatarDataBR(i["Data"])}</div><div style="font-weight: 800; color: var(--p-med); font-size: 0.85em; margin-bottom: 8px; text-transform: uppercase;">${i["Titulo"]}</div><div style="font-size: 1em; line-height: 1.4; white-space: pre-wrap;">${String(i["Mensagem"] || "")}</div></div>`).join('');
+        const itens = (dadosApp["Avisos"] || []).slice().reverse();
+        corpo.innerHTML = itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:12px; margin-bottom:12px; border-left: 4px solid var(--p-med);"><div style="font-size: 0.75em; color: #888;">${formatarDataBR(i["Data"])}</div><div style="font-weight:800; color:var(--p-med); text-transform:uppercase;">${i["Titulo"]}</div><div style="white-space:pre-wrap; margin-top:5px;">${i["Mensagem"]}</div></div>`).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
@@ -168,12 +225,11 @@
         document.getElementById('modal-titulo').innerText = "Arquivos";
         corpo.innerHTML = "";
         const itens = dadosApp["Arquivos"] || [];
-        const nomesMaterias = [...new Set(itens.map(i => i["Nome"]))];
-        nomesMaterias.forEach(n => {
+        [...new Set(itens.map(i => i["Nome"]))].forEach(n => {
             const links = itens.filter(i => i["Nome"] === n);
             let html = links.map(a => {
                 const temLink = a["Links"] && String(a["Links"]).includes("http");
-                return `<${temLink ? 'a href="'+a["Links"]+'" target="_blank"' : 'div'} class="item-lista"><span class="arquivo-nome">${a["Descrição"]}</span>${temLink ? '<span>📂</span>' : '<span class="link-vazio">⏳ Aguardando links</span>'}</${temLink ? 'a' : 'div'}>`;
+                return `<${temLink ? 'a href="'+a["Links"]+'" target="_blank"' : 'div'} class="item-lista"><b>${a["Descrição"]}</b>${temLink ? '<span>📂</span>' : '<span class="link-vazio">⏳ Aguardando</span>'}</${temLink ? 'a' : 'div'}>`;
             }).join('');
             corpo.innerHTML += `<details class="secao-retratil" name="arqs"><summary class="secao-titulo">${n} <span>▾</span></summary><div style="padding:5px 10px;">${html}</div></details>`;
         });
@@ -184,104 +240,78 @@
     function abrirGrupos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grupos";
-        corpo.innerHTML = `<div id="container-grupos"></div>`;
+        corpo.innerHTML = "";
         const lista = dadosApp["Grupos"] || [];
-        const materias = [...new Set(lista.map(i => i["Matéria"]))];
-        materias.forEach(mat => {
+        [...new Set(lista.map(i => i["Matéria"]))].forEach(mat => {
             const gruposMat = lista.filter(i => i["Matéria"] === mat);
-            const nomesG = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))];
-            let htmlGrupos = nomesG.map(ng => {
+            let html = [...new Set(gruposMat.map(g => g["Nome do Grupo"]))].map(ng => {
                 const membros = gruposMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;"><summary style="padding:10px; font-size:0.9em;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${membros}</ul></details>`;
+                return `<details style="margin:5px 0; border:1px solid rgba(128,128,128,0.2); border-radius:10px;"><summary style="padding:10px;">${ng}</summary><ul style="font-size:0.85em; color:#bbb;">${membros}</ul></details>`;
             }).join('');
-            document.getElementById('container-grupos').innerHTML += `<details class="secao-retratil" name="gps"><summary class="secao-titulo">${mat} <span>▾</span></summary><div style="padding:10px;">${htmlGrupos}</div></details>`;
+            corpo.innerHTML += `<details class="secao-retratil" name="gps"><summary class="secao-titulo">${mat} <span>▾</span></summary><div style="padding:10px;">${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
         setupAccordion("gps");
     }
 
-    // FUNÇÃO AULAS ONLINE COM LÓGICA DE CORES
     function abrirLinks() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Portal de Aulas Online";
         const itens = dadosApp["Links"] || [];
-        
         if (itens.length === 0) {
             corpo.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Nenhum link agendado.</p>";
         } else {
             corpo.innerHTML = itens.map(i => {
                 const agora = new Date();
-                
-                // Como agora o script manda texto exato: "14/02/2026" e "19:00"
                 const [d, m, a] = i["Data"].split('/');
                 const [hh, mm] = i["Horário"].split(':');
                 const dataAula = new Date(a, m - 1, d, hh, mm);
-
-                const exibicaoCompleta = `${i["Data"]} - ${i["Horário"]}`;
-
-                let statusHtml = "", btnCor = "#6c757d", textoBtn = "LINK INDISPONÍVEL";
-
-                if (agora >= dataAula) {
-                    statusHtml = '<span style="color:#28a745; font-size:0.7em; font-weight:bold;">● AO VIVO</span>';
-                    btnCor = "#28a745"; textoBtn = "ACESSAR AULA AGORA";
-                } else {
-                    statusHtml = `<span style="color:#ffa500; font-size:0.7em; font-weight:bold;">⌛ AGENDADA</span>`;
-                    btnCor = "#007bff"; textoBtn = "ABRIR LINK";
-                }
-
+                let btnCor = (agora >= dataAula) ? "#28a745" : "#007bff";
+                let status = (agora >= dataAula) ? "● AO VIVO" : "⌛ AGENDADA";
                 let url = i["Url"].startsWith('http') ? i["Url"] : 'https://' + i["Url"];
 
                 return `<div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
-                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                        <b style="color:var(--p-med); font-size:1.1em;">${i["Materia"]}</b>
-                        ${statusHtml}
+                    <div style="display:flex; justify-content:space-between; width:100%;">
+                        <b>${i["Materia"]}</b>
+                        <span style="color:${btnCor}; font-size:0.7em; font-weight:bold;">${status}</span>
                     </div>
-                    <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">🗓️ ${exibicaoCompleta}</div>
-                    <a href="${url}" target="_blank" style="background:${btnCor}; color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px; display:block;">${textoBtn}</a>
+                    <div style="margin: 5px 0; font-size:0.85em; opacity:0.8;">🗓️ ${i["Data"]} - ${i["Horário"]}</div>
+                    <a href="${url}" target="_blank" style="background:${btnCor}; color:white; text-decoration:none; padding:12px; border-radius:10px; width:100%; text-align:center; font-weight:bold; margin-top:10px;">${agora >= dataAula ? 'ACESSAR AGORA' : 'ABRIR LINK'}</a>
                 </div>`;
             }).join('');
         }
         document.getElementById('meuModal').style.display = 'flex';
     }
-    
-    
-    function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
 
-    function toggleTheme() {
-        const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', n);
-        document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '💡';
-        localStorage.setItem('med_h_theme', n);
-    }
+    // ENVIO PARA A PLANILHA
+    async function enviarDados(tipo) {
+        const msgDiv = tipo === 'Links' ? document.getElementById('msgLink') : document.getElementById('msgAviso');
+        msgDiv.innerText = "Enviando...";
+        msgDiv.style.color = "orange";
 
-    window.onload = () => {
-        const t = localStorage.getItem('med_h_theme') || 'dark';
-        document.body.setAttribute('data-theme', t);
-        carregarDados();
-
-        // LÓGICA DO TOQUE LONGO NO BOTÃO AULAS ONLINE (3 SEGUNDOS)
-        const btnAulas = document.getElementById('btnAulasOnline');
-        if(btnAulas) {
-            ['touchstart', 'mousedown'].forEach(evt => btnAulas.addEventListener(evt, () => {
-                timerPlanilha = setTimeout(() => {
-                    // SEU LINK DA PLANILHA AQUI
-                    window.open("https://docs.google.com/spreadsheets/d/1dQr8rqCfIyGqfkEIQCzqgxxKjsamDP3Nt4SpYu76D1o/edit?gid=968241645#gid=968241645", "_blank");
-                }, 3000);
-            }));
-            ['touchend', 'mouseup', 'mouseleave'].forEach(evt => btnAulas.addEventListener(evt, () => clearTimeout(timerPlanilha)));
+        let payload = { aba: tipo };
+        if (tipo === 'Links') {
+            payload.senha = document.getElementById('senhaLink').value;
+            payload.data = document.getElementById('dataLink').value;
+            payload.horario = document.getElementById('horaLink').value;
+            payload.materia = document.getElementById('materiaLink').value;
+            payload.url = document.getElementById('urlLink').value;
+        } else {
+            payload.senha = document.getElementById('senhaAviso').value;
+            payload.titulo = document.getElementById('tituloAviso').value;
+            payload.mensagem = document.getElementById('textoAviso').value;
         }
 
-        setTimeout(() => { 
-            const s = document.getElementById('splash');
-            if(s) { s.style.opacity = '0'; setTimeout(() => s.style.display = 'none', 800); }
-        }, 1800);
-    };
+        try {
+            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            msgDiv.innerText = "Enviado com Sucesso!";
+            msgDiv.style.color = "#28a745";
+            setTimeout(() => location.reload(), 2000);
+        } catch (e) {
+            msgDiv.innerText = "Erro na conexão.";
+            msgDiv.style.color = "red";
+        }
+    }
 </script>
 </body>
 </html>
-
-
-
-
-
-
