@@ -212,47 +212,47 @@
             corpo.innerHTML = itens.map(i => {
                 const agora = new Date();
                 
-                // 1. FORÇAR TRATAMENTO COMO TEXTO
-                let strData = String(i["Data"]); // Vem 14/02/2026
-                let strHora = String(i["Horário"]); // Vem 19:00
-                
+                // 1. CAPTURA DOS TEXTOS (Limpando espaços e possíveis ISO strings)
+                let txtData = String(i["Data"]).trim();
+                let txtHora = String(i["Horário"]).trim();
+
+                // Se o Google mandou uma data completa (ISO), pegamos só a parte da data
+                if (txtData.includes('T')) txtData = txtData.split('T')[0];
+
                 let dataAula;
 
-                // Se a data vier no formato BR (DD/MM/AAAA)
-                if (strData.includes('/')) {
-                    const partesData = strData.split('/');
-                    const partesHora = strHora.split(':');
-                    
-                    // Atenção: o mês no JS começa em 0 (Janeiro = 0, Fevereiro = 1)
-                    dataAula = new Date(
-                        parseInt(partesData[2]), // Ano
-                        parseInt(partesData[1]) - 1, // Mês
-                        parseInt(partesData[0]), // Dia
-                        parseInt(partesHora[0] || 0), // Hora
-                        parseInt(partesHora[1] || 0)  // Minuto
-                    );
-                } else {
-                    // Caso o Google mande formato ISO ou outro, tenta o padrão
+                // 2. ANALISAR FORMATO DD/MM/AAAA OU AAAA-MM-DD
+                if (txtData.includes('/')) {
+                    const [d, m, a] = txtData.split('/');
+                    const [hh, mm] = txtHora.split(':');
+                    dataAula = new Date(a, m - 1, d, hh || 0, mm || 0);
+                } 
+                else if (txtData.includes('-')) {
+                    const [a, m, d] = txtData.split('-');
+                    const [hh, mm] = txtHora.split(':');
+                    dataAula = new Date(a, m - 1, d, hh || 0, mm || 0);
+                }
+                else {
+                    // Se o Google mandou um número serial, o JS vai errar feio aqui.
+                    // Tentamos tratar o erro para não mostrar datas de maio/setembro
                     dataAula = new Date(i["Data"]);
-                    if (strHora.includes(':')) {
-                        const [h, m] = strHora.split(':');
-                        dataAula.setHours(parseInt(h), parseInt(m), 0);
-                    }
                 }
 
-                // 2. FORMATAÇÃO MANUAL (Garante que apareça exatamente o que você quer)
-                const dia = String(dataAula.getDate()).padStart(2, '0');
-                const mes = String(dataAula.getMonth() + 1).padStart(2, '0');
-                const ano = dataAula.getFullYear();
-                const hora = String(dataAula.getHours()).padStart(2, '0');
-                const min = String(dataAula.getMinutes()).padStart(2, '0');
+                // 3. FORMATAÇÃO FINAL PARA EXIBIÇÃO (Forçando o que veio da planilha)
+                // Se o processamento acima falhar, usamos o texto bruto da planilha
+                const exibicaoData = (txtData.includes('/') || txtData.includes('-')) ? 
+                    dataAula.toLocaleDateString('pt-BR') : txtData;
                 
-                const exibicaoCompleta = `${dia}/${mes}/${ano} - ${hora}:${min}`;
+                const exibicaoHora = txtHora.includes(':') ? txtHora : "00:00";
+                
+                const exibicaoCompleta = `${exibicaoData} - ${exibicaoHora}`;
 
-                // 3. LÓGICA DE STATUS
+                // 4. LÓGICA DE STATUS E CORES
                 let statusHtml = "", btnCor = "#6c757d", textoBtn = "LINK INDISPONÍVEL";
 
-                if (agora >= dataAula) {
+                if (isNaN(dataAula.getTime())) {
+                    textoBtn = "ERRO NA DATA";
+                } else if (agora >= dataAula) {
                     statusHtml = '<span style="color:#28a745; font-size:0.7em; font-weight:bold;">● AO VIVO</span>';
                     btnCor = "#28a745"; 
                     textoBtn = "ACESSAR AULA AGORA";
@@ -262,11 +262,8 @@
                     textoBtn = "ABRIR LINK";
                 }
 
-                // Ajuste de URL para garantir que funcione se não tiver http
                 let linkFinal = i["Url"] || "#";
-                if (linkFinal !== "#" && !linkFinal.startsWith('http')) {
-                    linkFinal = 'https://' + linkFinal;
-                }
+                if (linkFinal !== "#" && !linkFinal.startsWith('http')) linkFinal = 'https://' + linkFinal;
 
                 return `<div class="item-lista" style="flex-direction:column; align-items:flex-start; border-left: 5px solid ${btnCor};">
                     <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
@@ -318,6 +315,7 @@
 </script>
 </body>
 </html>
+
 
 
 
