@@ -30,36 +30,36 @@
         .card:active { transform: scale(0.95); }
         .card span { display: block; font-size: 1.5em; margin-bottom: 8px; }
         
-        .notification-badge { position: absolute; top: 8px; right: 12px; background: #ff3b30; color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; display: none; animation: bounce 0.5s infinite alternate; z-index: 10; }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; z-index: 2000; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; position: relative; text-align: left; display: flex; flex-direction: column; }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-color); cursor: pointer; padding: 5px; z-index: 100; }
         
         .search-container { position: sticky; top: -26px; background: var(--card-bg); z-index: 10; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid var(--shadow); }
         .search-input { width: 100%; height: 45px; padding: 0 15px; border-radius: 10px; border: none; background: var(--input-bg); color: var(--text-color); box-sizing: border-box; font-size: 16px; outline: none; -webkit-appearance: none; }
 
-        /* Estilo da Matéria Retrátil */
-        .materia-retratil { margin-bottom: 12px; border: 1px solid var(--shadow); border-radius: 12px; overflow: hidden; background: var(--card-bg); }
-        .materia-sumario { background: rgba(0,123,255,0.07); padding: 14px; font-weight: 800; color: var(--p-med); text-transform: uppercase; font-size: 0.85em; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .materia-sumario::after { content: '📁'; font-size: 1.1em; }
-        .materia-retratil[open] .materia-sumario { border-bottom: 1px solid var(--shadow); background: rgba(0,123,255,0.12); }
-        .materia-retratil[open] .materia-sumario::after { content: '📂'; }
+        /* Estilo da Matéria */
+        .materia-retratil { margin-bottom: 10px; border: 1px solid var(--shadow); border-radius: 12px; background: var(--card-bg); overflow: hidden; }
+        .materia-sumario { 
+            display: flex !important; justify-content: space-between !important; align-items: center !important;
+            background: rgba(0,123,255,0.07); padding: 14px; font-weight: 800; color: var(--p-med); 
+            text-transform: uppercase; font-size: 0.85em; cursor: pointer; list-style: none;
+        }
+        .materia-sumario::-webkit-details-marker { display: none; }
+        .materia-sumario::after { content: '📁'; opacity: 0.5; }
+        .materia-retratil[open] .materia-sumario::after { content: '📂'; opacity: 1; }
 
-        .conteudo-grupos { padding: 10px; }
+        /* Estilo do Grupo Interno */
+        .grupo-detalhe { border-bottom: 1px solid rgba(0,0,0,0.05); margin: 0 10px; }
+        .grupo-sumario { 
+            display: flex !important; justify-content: space-between !important; align-items: center !important;
+            width: 100%; padding: 12px 5px; cursor: pointer; font-weight: 600; font-size: 0.95em; list-style: none;
+        }
+        .grupo-sumario::-webkit-details-marker { display: none; }
+
+        ul.lista-integrantes { padding: 10px 0 15px 25px !important; margin: 0 !important; list-style-type: circle; border-left: 2px solid var(--p-med); margin-bottom: 10px !important; }
         
         .aviso-item { border-bottom: 1px solid var(--shadow); padding: 12px 0; }
-        .aviso-titulo { font-weight: bold; color: var(--text-color); display: block; }
-        
         .arquivo-btn { display: inline-flex; align-items: center; background: var(--p-med); color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.85em; margin-top: 8px; font-weight: bold; }
-        
-        /* Estilo do Grupo Interno */
-        .grupo-detalhe { border-bottom: 1px solid rgba(0,0,0,0.05); }
-        summary.grupo-sumario { outline: none; list-style: none; display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100%; padding: 10px 5px; cursor: pointer; font-weight: 600; font-size: 0.95em; }
-        summary.grupo-sumario::-webkit-details-marker { display: none; }
-        
-        ul.lista-integrantes { padding-left: 20px !important; margin: 5px 0 15px 0 !important; list-style-type: circle; text-align: left !important; border-left: 2px solid var(--p-med); }
         
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; z-index: 999; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 15px var(--shadow); cursor: pointer; }
     </style>
@@ -107,47 +107,14 @@
 
     async function carregarDados() {
         const status = document.getElementById('status-bar');
-        const cache = localStorage.getItem('cache_medicina');
-        if(cache) {
-            dadosApp = JSON.parse(cache);
-            verificarNovosAvisos();
-            status.innerHTML = `<span style="color:#888">Sincronizando...</span>`;
-        }
-
         try {
             const res = await fetch(URL_API);
             dadosApp = await res.json();
             localStorage.setItem('cache_medicina', JSON.stringify(dadosApp));
             status.innerHTML = `<span class="status-online">● Atualizado: ${dadosApp.ultima_sincronizacao}</span>`;
-            verificarNovosAvisos();
         } catch (e) {
-            if(dadosApp.ultima_sincronizacao) status.innerHTML = `<span style="color:#eead2d">● Offline - ${dadosApp.ultima_sincronizacao}</span>`;
-        }
-    }
-
-    function verificarNovosAvisos() {
-        if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
-            const ultimoLido = localStorage.getItem('ultimo_id_aviso_lido');
-            if (ultimoLido && idAvisoAtual === ultimoLido) {
-                document.getElementById('badge-avisos').style.display = 'none';
-            } else if (!ultimoLido) {
-                localStorage.setItem('ultimo_id_aviso_lido', idAvisoAtual);
-                document.getElementById('badge-avisos').style.display = 'none';
-            } else {
-                document.getElementById('badge-avisos').style.display = 'block';
-            }
-        }
-    }
-
-    function abrirAvisos() {
-        mostrarAba('Avisos');
-        document.getElementById('badge-avisos').style.display = 'none';
-        if (dadosApp.Avisos && dadosApp.Avisos.length > 0) {
-            const ultimoAviso = dadosApp.Avisos[dadosApp.Avisos.length - 1];
-            const idAvisoAtual = btoa(unescape(encodeURIComponent((ultimoAviso.Titulo || "") + (ultimoAviso.Mensagem || ""))));
-            localStorage.setItem('ultimo_id_aviso_lido', idAvisoAtual);
+            const cache = localStorage.getItem('cache_medicina');
+            if(cache) dadosApp = JSON.parse(cache);
         }
     }
 
@@ -156,28 +123,16 @@
         const materias = document.querySelectorAll('.materia-retratil');
         
         materias.forEach(matBox => {
-            let materiaTemMatch = false;
-            const grupos = matBox.querySelectorAll('.grupo-detalhe');
-            
-            grupos.forEach(grp => {
-                const textoInterno = grp.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                if (textoInterno.includes(termo)) {
-                    grp.style.display = "block";
-                    materiaTemMatch = true;
+            let matchMat = false;
+            matBox.querySelectorAll('.grupo-detalhe').forEach(grp => {
+                const txt = grp.innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (txt.includes(termo)) {
+                    grp.style.display = "block"; matchMat = true;
                     if (termo.length > 2) grp.setAttribute('open', 'true');
-                } else {
-                    grp.style.display = "none";
-                    grp.removeAttribute('open');
-                }
+                } else { grp.style.display = "none"; grp.removeAttribute('open'); }
             });
-
-            if (materiaTemMatch) {
-                matBox.style.display = "block";
-                if (termo.length > 1) matBox.setAttribute('open', 'true');
-            } else {
-                matBox.style.display = "none";
-                if (termo.length === 0) matBox.removeAttribute('open');
-            }
+            matBox.style.display = matchMat ? "block" : "none";
+            if (matchMat && termo.length > 1) matBox.setAttribute('open', 'true');
         });
     }
 
@@ -188,56 +143,59 @@
         corpo.innerHTML = "";
         let itens = dadosApp[nomeAba] || [];
 
-        if(itens.length === 0) {
-            corpo.innerHTML = "<p style='text-align:center; color:#888;'>Nada cadastrado aqui ainda.</p>";
-        } else {
-            if(nomeAba === "Grupos") {
-                corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar nome ou grupo..." oninput="filtrarGrupos()"></div>`;
-                const estrutura = {}; 
-                itens.forEach(item => {
-                    const mat = formatarNome(item["Matéria"] || "Geral");
-                    const grp = formatarNome(item["Nome do Grupo"] || "Sem Grupo");
-                    if(!estrutura[mat]) estrutura[mat] = {};
-                    if(!estrutura[mat][grp]) estrutura[mat][grp] = [];
-                    if(item["Integrantes"]) estrutura[mat][grp].push(formatarNome(item["Integrantes"]));
+        if(nomeAba === "Grupos") {
+            corpo.innerHTML = `<div class="search-container"><input type="text" id="inputBusca" class="search-input" placeholder="🔍 Buscar nome ou grupo..." oninput="filtrarGrupos()"></div>`;
+            const estrutura = {}; 
+            itens.forEach(item => {
+                const mat = formatarNome(item["Matéria"] || "Geral");
+                const grp = formatarNome(item["Nome do Grupo"] || "Sem Grupo");
+                if(!estrutura[mat]) estrutura[mat] = {};
+                if(!estrutura[mat][grp]) estrutura[mat][grp] = [];
+                if(item["Integrantes"]) estrutura[mat][grp].push(formatarNome(item["Integrantes"]));
+            });
+
+            for (let mat in estrutura) {
+                const matDet = document.createElement('details');
+                matDet.className = 'materia-retratil';
+                // Lógica de auto-recolhimento das matérias
+                matDet.addEventListener('toggle', function() {
+                    if(this.open) {
+                        corpo.querySelectorAll('.materia-retratil').forEach(m => { if(m !== this) m.removeAttribute('open'); });
+                    }
                 });
 
-                for (let mat in estrutura) {
-                    const matDetails = document.createElement('details');
-                    matDetails.className = 'materia-retratil';
-                    matDetails.innerHTML = `<summary class="materia-sumario">${mat}</summary><div class="conteudo-grupos"></div>`;
-                    const containerGrupos = matDetails.querySelector('.conteudo-grupos');
+                matDet.innerHTML = `<summary class="materia-sumario">${mat}</summary><div class="container-grupos"></div>`;
+                const container = matDet.querySelector('.container-grupos');
 
-                    for (let grp in estrutura[mat]) {
-                        const grpDet = document.createElement('details');
-                        grpDet.className = 'grupo-detalhe';
-                        grpDet.innerHTML = `
-                            <summary class="grupo-sumario"><span>${grp}</span><small style="color:#888;">${estrutura[mat][grp].length} ▾</small></summary>
-                            <ul class="lista-integrantes">${estrutura[mat][grp].map(n => `<li>${n}</li>`).join('')}</ul>
-                        `;
-                        containerGrupos.appendChild(grpDet);
-                    }
-                    corpo.appendChild(matDetails);
+                for (let grp in estrutura[mat]) {
+                    const grpDet = document.createElement('details');
+                    grpDet.className = 'grupo-detalhe';
+                    // Lógica de auto-recolhimento dos grupos internos
+                    grpDet.addEventListener('toggle', function() {
+                        if(this.open) {
+                            container.querySelectorAll('.grupo-detalhe').forEach(g => { if(g !== this) g.removeAttribute('open'); });
+                        }
+                    });
+
+                    grpDet.innerHTML = `
+                        <summary class="grupo-sumario"><span>${grp}</span><small style="color:#888;">${estrutura[mat][grp].length} ▾</small></summary>
+                        <ul class="lista-integrantes">${estrutura[mat][grp].map(n => `<li>${n}</li>`).join('')}</ul>
+                    `;
+                    container.appendChild(grpDet);
                 }
-            } else if(nomeAba === "Arquivos") {
-                itens.reverse().forEach(item => {
-                    const div = document.createElement('div'); div.className = 'aviso-item';
-                    div.innerHTML = `<span class="aviso-titulo">${item.Nome || 'Arquivo'}</span>
-                                     <small style="color:#888; display:block; margin:4px 0;">${item.Descrição || ''}</small>
-                                     <a href="${item.Link}" target="_blank" class="arquivo-btn">📂 Abrir Arquivo</a>`;
-                    corpo.appendChild(div);
-                });
-            } else {
-                itens.reverse().forEach(item => {
-                    const div = document.createElement('div'); div.className = 'aviso-item';
-                    if(nomeAba === "Avisos") {
-                        div.innerHTML = `<small style="color:#888;">${item.Data ? new Date(item.Data).toLocaleDateString('pt-BR') : ""}</small><span class="aviso-titulo" style="color:var(--p-med);">${item.Titulo || 'Aviso'}</span><div style="font-size:0.9em; margin-top:5px;">${item.Mensagem || ''}</div>`;
-                    } else if(nomeAba === "Grade") {
-                        div.innerHTML = `<span class="aviso-titulo">${item.Matéria || ''}</span><small style="color:#888;">${item.Horário || ''} - ${item.Sala || ''}</small>`;
-                    }
-                    corpo.appendChild(div);
-                });
+                corpo.appendChild(matDet);
             }
+        } else {
+            // Outras abas (Arquivos, Grade, etc)
+            itens.reverse().forEach(item => {
+                const div = document.createElement('div'); div.className = 'aviso-item';
+                if(nomeAba === "Arquivos") {
+                    div.innerHTML = `<span style="font-weight:bold">${item.Nome || 'Arquivo'}</span><br><a href="${item.Link}" target="_blank" class="arquivo-btn">📂 Abrir</a>`;
+                } else if(nomeAba === "Grade") {
+                    div.innerHTML = `<b>${item.Matéria || ''}</b><br><small>${item.Horário || ''}</small>`;
+                }
+                corpo.appendChild(div);
+            });
         }
         modal.style.display = "flex";
     }
@@ -253,14 +211,11 @@
 
     window.addEventListener('load', () => {
         carregarDados();
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            document.getElementById('theme-icon').innerText = '🌙';
-        }
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
         setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('theme-toggle').style.display = 'flex'; }, 800);
-        }, 1800);
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('theme-toggle').style.display = 'flex';
+        }, 2000);
     });
 </script>
 </body>
