@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Medicina - Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=14">
-    <link rel="apple-touch-icon" href="icon.png?v=14">
-    <link rel="icon" type="image/png" href="icon.png?v=14">
+    <link rel="manifest" href="manifest.json?v=15">
+    <link rel="apple-touch-icon" href="icon.png?v=15">
+    <link rel="icon" type="image/png" href="icon.png?v=15">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; --danger: #ff3b30; }
@@ -38,25 +38,38 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 15px; z-index: 2000; backdrop-filter: blur(10px); }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.2); text-align: left !important; }
         
-        /* Forçando títulos e textos para a esquerda */
-        #modal-titulo { text-align: left !important; display: block; width: 100%; margin-bottom: 20px; color: var(--p-med); font-weight: 800; }
-        #modal-corpo { text-align: left !important; width: 100%; }
+        #modal-titulo { text-align: left !important; display: block; width: 100%; margin-bottom: 20px; color: var(--p-med); font-weight: 800; font-size: 1.4em; }
+        #modal-corpo { text-align: left !important; width: 100%; display: block; }
 
         .close-btn { position: absolute; top: 15px; right: 20px; background: #333; border: none; font-size: 20px; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
-        .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; }
-        .secao-titulo { background: rgba(0,123,255,0.15); color: #4dabff; padding: 16px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; text-align: left; }
+        /* CORREÇÃO DOS TÍTULOS (DIAS, MATÉRIAS, GRUPOS) */
+        .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; width: 100%; }
+        
+        .secao-titulo { 
+            background: rgba(0,123,255,0.15); 
+            color: #4dabff; 
+            padding: 16px; 
+            font-weight: 800; 
+            font-size: 0.85em; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            display: flex !important; /* Mantém ícone e texto na mesma linha */
+            justify-content: space-between !important; 
+            align-items: center; 
+            list-style: none; 
+            text-align: left !important; /* FORÇA ESQUERDA */
+        }
+        .secao-titulo::-webkit-details-marker { display: none; } /* Remove seta padrão */
 
-        .grade-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); text-align: left; }
+        .grade-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); text-align: left !important; }
         .grade-hora { flex: 0 0 100px; height: 45px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.72em; text-align: center; background: var(--p-med); border-radius: 10px; }
         
-        .item-lista-link { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 12px; text-decoration: none; color: inherit; margin-bottom: 8px; text-align: left; }
-        .item-aguardando { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed #444; border-radius: 12px; color: #888; margin: 10px; font-style: italic; font-size: 0.85em; text-align: left; }
+        .item-lista-link { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 12px; text-decoration: none; color: inherit; margin-bottom: 8px; text-align: left !important; }
+        .item-aguardando { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed #444; border-radius: 12px; color: #888; margin: 10px; font-style: italic; font-size: 0.85em; text-align: left !important; }
 
-        .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #444; background: var(--input-bg); color: var(--text-color); font-size: 16px; text-align: left; }
-        .admin-btn { width: 100%; padding: 15px; background: var(--p-med); color: white; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-
-        .footer-creditos { text-align: center; font-size: 11px; color: #666; margin-top: 50px; padding: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); user-select: none; }
+        ul { text-align: left !important; padding-left: 25px; margin: 10px 0; }
+        li { text-align: left !important; margin-bottom: 5px; }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; }
         #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; line-height: 40px; }
@@ -150,7 +163,6 @@
         document.getElementById('aviso-badge').style.display = (avisos.length > lidos) ? 'block' : 'none';
     }
 
-    // --- LOGICA DE ADMIN (LONG PRESS 5s) ---
     function setupLongPress() {
         const configurar = (id, callback) => {
             let timer;
@@ -166,27 +178,6 @@
         configurar('meuNome', abrirPainelAvisos);
     }
 
-    async function publicar(aba) {
-        const status = document.getElementById('adm-status');
-        const payload = { senha: document.getElementById('adm-senha').value, aba: aba };
-        if(aba === 'Links') {
-            payload.data = document.getElementById('adm-data').value;
-            payload.horario = document.getElementById('adm-hora').value;
-            payload.materia = document.getElementById('adm-materia').value;
-            payload.url = document.getElementById('adm-url').value;
-        } else {
-            payload.titulo = document.getElementById('adm-titulo').value;
-            payload.mensagem = document.getElementById('adm-msg').value;
-        }
-        status.innerText = "Publicando...";
-        try {
-            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            status.innerText = "✅ Sucesso!";
-            setTimeout(fecharModal, 1500);
-        } catch(e) { status.innerText = "❌ Erro."; }
-    }
-
-    // --- FUNÇÕES DE EXIBIÇÃO ---
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
@@ -194,47 +185,12 @@
         const itens = dadosApp["Grade"] || [];
         const ordem = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
         const dias = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a,b) => ordem.findIndex(d => a.includes(d)) - ordem.findIndex(d => b.includes(d)));
+        
         dias.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia && a["Matéria"] && a["Matéria"].trim() !== "");
             let html = aulas.length === 0 ? `<div class="item-aguardando"><span>Aguardando aulas...</span><span>⏳</span></div>` :
-                aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"]}</div><div style="flex:1;"><b>${a["Matéria"]}</b><br><small style="opacity:0.6">👥 ${a["Grupo"] || 'Geral'}</small></div></div>`).join('');
-            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${dia}</summary><div>${html}</div></details>`;
-        });
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    function abrirLinks() {
-        const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Aulas Online";
-        const itens = dadosApp["Links"] || [];
-        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Nenhuma aula agendada.</p>" : itens.map(i => `
-            <div style="padding:15px; background:var(--input-bg); border-radius:15px; margin-bottom:10px; text-align:left;">
-                <b>${i["Materia"] || i["Matéria"]}</b><br>
-                <small style="opacity:0.7;">🗓️ ${i["Data"]} - ${i["Horário"] || i["Horario"]}</small>
-                <a href="${i["Url"] || i["URL"]}" target="_blank" style="display:block; background:var(--p-med); color:white; text-align:center; padding:12px; border-radius:10px; margin-top:10px; text-decoration:none; font-weight:bold;">ACESSAR AULA</a>
-            </div>`).join('');
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    function abrirAvisos() {
-        const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Avisos Recentes";
-        const itens = (dadosApp["Avisos"] || []).slice().reverse();
-        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Sem avisos.</p>" : itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med); text-align:left;"><small style="color:#888;">${i["Data"]}</small><br><b style="color:var(--p-med);">${i["Titulo"]}</b><p style="font-size:0.9em; margin-top:5px; white-space:pre-wrap;">${i["Mensagem"]}</p></div>`).join('');
-        localStorage.setItem('avisos_lidos', (dadosApp["Avisos"] || []).length);
-        document.getElementById('aviso-badge').style.display = 'none';
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    function abrirArquivos() {
-        const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Arquivos";
-        corpo.innerHTML = "";
-        const itens = dadosApp["Arquivos"] || [];
-        [...new Set(itens.map(i => i["Nome"]))].forEach(n => {
-            const links = itens.filter(i => i["Nome"] === n);
-            let html = links.map(a => (!a["Links"] || a["Links"] === "#") ? `<div class="item-aguardando"><span>${a["Descrição"]}</span><span>⏳</span></div>` : `<a href="${a["Links"]}" target="_blank" class="item-lista-link"><b>${a["Descrição"]}</b><span>📂</span></a>`).join('');
-            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${n}</summary><div style="padding:10px;">${html}</div></details>`;
+                aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"]}</div><div style="flex:1; text-align:left;"><b>${a["Matéria"]}</b><br><small style="opacity:0.6">👥 ${a["Grupo"] || 'Geral'}</small></div></div>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo"><span>${dia}</span><span>▼</span></summary><div>${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
     }
@@ -255,10 +211,46 @@
             const nomes = [...new Set(gMat.map(g => g["Nome do Grupo"]))];
             let h = nomes.map(ng => {
                 const mb = gMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `<details style="margin:5px 0; border:1px solid #333; border-radius:8px; text-align:left;"><summary style="padding:10px; font-weight:bold; cursor:pointer;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px; text-align: left;">${mb}</ul></details>`;
+                return `<details style="margin:5px 0; border:1px solid #333; border-radius:8px;"><summary style="padding:10px; font-weight:bold; cursor:pointer; text-align:left; display:block;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px; text-align: left;">${mb}</ul></details>`;
             }).join('');
-            container.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${m}</summary><div style="padding:5px 10px; text-align: left;">${h}</div></details>`;
+            container.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo"><span>${m}</span><span>▼</span></summary><div style="padding:5px 10px; text-align: left;">${h}</div></details>`;
         });
+    }
+
+    function abrirArquivos() {
+        const corpo = document.getElementById('modal-corpo');
+        document.getElementById('modal-titulo').innerText = "Arquivos";
+        corpo.innerHTML = "";
+        const itens = dadosApp["Arquivos"] || [];
+        [...new Set(itens.map(i => i["Nome"]))].forEach(n => {
+            const links = itens.filter(i => i["Nome"] === n);
+            let html = links.map(a => (!a["Links"] || a["Links"] === "#") ? `<div class="item-aguardando"><span>${a["Descrição"]}</span><span>⏳</span></div>` : `<a href="${a["Links"]}" target="_blank" class="item-lista-link"><b>${a["Descrição"]}</b><span>📂</span></a>`).join('');
+            corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo"><span>${n}</span><span>▼</span></summary><div style="padding:10px;">${html}</div></details>`;
+        });
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    function abrirAvisos() {
+        const corpo = document.getElementById('modal-corpo');
+        document.getElementById('modal-titulo').innerText = "Avisos Recentes";
+        const itens = (dadosApp["Avisos"] || []).slice().reverse();
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Sem avisos.</p>" : itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med); text-align:left;"><small style="color:#888;">${i["Data"]}</small><br><b style="color:var(--p-med);">${i["Titulo"]}</b><p style="font-size:0.9em; margin-top:5px; white-space:pre-wrap;">${i["Mensagem"]}</p></div>`).join('');
+        localStorage.setItem('avisos_lidos', (dadosApp["Avisos"] || []).length);
+        document.getElementById('aviso-badge').style.display = 'none';
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    function abrirLinks() {
+        const corpo = document.getElementById('modal-corpo');
+        document.getElementById('modal-titulo').innerText = "Aulas Online";
+        const itens = dadosApp["Links"] || [];
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Nenhuma aula agendada.</p>" : itens.map(i => `
+            <div style="padding:15px; background:var(--input-bg); border-radius:15px; margin-bottom:10px; text-align:left;">
+                <b>${i["Materia"] || i["Matéria"]}</b><br>
+                <small style="opacity:0.7;">🗓️ ${i["Data"]} - ${i["Horário"] || i["Horario"]}</small>
+                <a href="${i["Url"] || i["URL"]}" target="_blank" style="display:block; background:var(--p-med); color:white; text-align:center; padding:12px; border-radius:10px; margin-top:10px; text-decoration:none; font-weight:bold;">ACESSAR AULA</a>
+            </div>`).join('');
+        document.getElementById('meuModal').style.display = 'flex';
     }
 
     function filtrarG() {
@@ -267,19 +259,6 @@
         renderGrupos(f);
     }
 
-    function abrirPainelLinks() {
-        document.getElementById('modal-titulo').innerText = "Postar Aula Online";
-        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-data" placeholder="Data (DD/MM/AAAA)"><input type="text" id="adm-hora" placeholder="Horário (HH:MM)"><input type="text" id="adm-materia" placeholder="Matéria"><input type="text" id="adm-url" placeholder="URL"><button class="admin-btn" onclick="publicar('Links')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    function abrirPainelAvisos() {
-        document.getElementById('modal-titulo').innerText = "Postar Aviso";
-        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-titulo" placeholder="Título"><textarea id="adm-msg" placeholder="Mensagem..." rows="4"></textarea><button class="admin-btn" onclick="publicar('Avisos')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    // --- PULL TO REFRESH ---
     function setupPullToRefresh() {
         let touchStart = 0;
         const ptr = document.getElementById('ptr');
@@ -298,6 +277,38 @@
             if (parseInt(ptr.style.height) > 50) carregarDados();
             ptr.style.height = '0';
         });
+    }
+
+    function abrirPainelLinks() {
+        document.getElementById('modal-titulo').innerText = "Postar Aula Online";
+        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-data" placeholder="Data (DD/MM/AAAA)"><input type="text" id="adm-hora" placeholder="Horário (HH:MM)"><input type="text" id="adm-materia" placeholder="Matéria"><input type="text" id="adm-url" placeholder="URL"><button class="admin-btn" onclick="publicar('Links')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    function abrirPainelAvisos() {
+        document.getElementById('modal-titulo').innerText = "Postar Aviso";
+        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-titulo" placeholder="Título"><textarea id="adm-msg" placeholder="Mensagem..." rows="4"></textarea><button class="admin-btn" onclick="publicar('Avisos')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    async function publicar(aba) {
+        const status = document.getElementById('adm-status');
+        const payload = { senha: document.getElementById('adm-senha').value, aba: aba };
+        if(aba === 'Links') {
+            payload.data = document.getElementById('adm-data').value;
+            payload.horario = document.getElementById('adm-hora').value;
+            payload.materia = document.getElementById('adm-materia').value;
+            payload.url = document.getElementById('adm-url').value;
+        } else {
+            payload.titulo = document.getElementById('adm-titulo').value;
+            payload.mensagem = document.getElementById('adm-msg').value;
+        }
+        status.innerText = "Publicando...";
+        try {
+            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            status.innerText = "✅ Sucesso!";
+            setTimeout(fecharModal, 1500);
+        } catch(e) { status.innerText = "❌ Erro."; }
     }
 </script>
 </body>
