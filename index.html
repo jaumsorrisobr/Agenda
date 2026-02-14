@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Med Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=5">
-    <link rel="apple-touch-icon" href="icon.png?v=5">
-    <link rel="icon" type="image/png" href="icon.png?v=5">
+    <link rel="manifest" href="manifest.json?v=6">
+    <link rel="apple-touch-icon" href="icon.png?v=6">
+    <link rel="icon" type="image/png" href="icon.png?v=6">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; --danger: #ff3b30; }
@@ -29,13 +29,10 @@
         #status-bar { font-size: 0.75em; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        /* CARD COM NOTIFICAÇÃO */
         .card { position: relative; background: var(--card-bg); height: 110px; border-radius: 18px; box-shadow: 0 4px 12px var(--shadow); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); }
         .card .icon { font-size: 2em; margin-bottom: 8px; }
 
-        /* A BOLINHA VERMELHA */
-        .badge { display: none; position: absolute; top: 12px; right: 12px; width: 14px; height: 14px; background-color: var(--danger); border-radius: 50%; border: 2px solid var(--card-bg); box-shadow: 0 0 8px rgba(255, 59, 48, 0.6); animation: jump 0.5s infinite alternate; }
+        .badge { display: none; position: absolute; top: 12px; right: 12px; width: 14px; height: 14px; background-color: var(--danger); border-radius: 50%; border: 2px solid var(--card-bg); animation: jump 0.5s infinite alternate; }
         @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-3px); } }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 15px; z-index: 2000; backdrop-filter: blur(10px); }
@@ -45,9 +42,32 @@
         .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; }
         .secao-titulo { background: rgba(0,123,255,0.15); color: #4dabff; padding: 16px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
         
-        .grade-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); }
-        .grade-hora { flex: 0 0 100px; height: 45px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.72em; text-align: center; background: var(--p-med); border-radius: 10px; }
-        .grade-info { flex: 1; text-align: left; font-size: 0.9em; }
+        /* CORREÇÃO DA GRADE: Flexbox ajustado */
+        .grade-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); }
+        
+        .grade-hora { 
+            flex: 0 0 100px; 
+            height: 45px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff; 
+            font-weight: 800; 
+            font-size: 0.72em; 
+            text-align: center; 
+            background: var(--p-med); 
+            border-radius: 10px;
+        }
+
+        /* TEXTO FIXADO À ESQUERDA */
+        .grade-info { 
+            flex: 1; 
+            text-align: left; /* Garante que o texto fique na esquerda */
+            font-size: 0.9em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; }
         #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; }
@@ -72,12 +92,10 @@
 <div class="grid-container">
     <div class="card" onclick="abrirGrade()"><span class="icon">📅</span><span>Grade</span></div>
     <div class="card" onclick="abrirGrupos()"><span class="icon">👥</span><span>Grupos</span></div>
-    
     <div class="card" onclick="abrirAvisos()">
         <div id="aviso-badge" class="badge"></div>
         <span class="icon">🔔</span><span>Avisos</span>
     </div>
-
     <div class="card" onclick="abrirArquivos()"><span class="icon">📄</span><span>Arquivos</span></div>
     <div id="btnAulasOnline" class="card" onclick="abrirLinks()" style="grid-column: span 2; height: 85px; flex-direction: row; gap: 15px;">
         <span class="icon">💻</span><span>Aulas Online</span>
@@ -97,7 +115,6 @@
     window.onload = () => {
         carregarDados();
         setupPullToRefresh();
-        
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
             setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
@@ -111,7 +128,6 @@
             dadosApp = await res.json();
             localStorage.setItem('med_h_cache', JSON.stringify(dadosApp));
             document.getElementById('status-bar').innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
-            
             verificarNovosAvisos();
         } catch (e) {
             document.getElementById('status-bar').innerText = "Modo Offline";
@@ -122,37 +138,11 @@
     function verificarNovosAvisos() {
         const avisos = dadosApp["Avisos"] || [];
         const lidos = parseInt(localStorage.getItem('avisos_lidos') || "0");
-        const badge = document.getElementById('aviso-badge');
-
-        if (avisos.length > lidos) {
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
+        document.getElementById('aviso-badge').style.display = (avisos.length > lidos) ? 'block' : 'none';
     }
 
-    function abrirAvisos() {
-        carregarDados();
-        const corpo = document.getElementById('modal-corpo');
-        document.getElementById('modal-titulo').innerText = "Avisos Recentes";
-        const itens = (dadosApp["Avisos"] || []).slice().reverse();
-        
-        // Salva que o usuário viu todos os avisos atuais
-        localStorage.setItem('avisos_lidos', (dadosApp["Avisos"] || []).length.toString());
-        document.getElementById('aviso-badge').style.display = 'none';
-
-        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center;'>Nenhum aviso.</p>" : itens.map(i => `
-            <div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med);">
-                <small style="color:#888">${i["Data"]}</small>
-                <div style="font-weight:800; color:var(--p-med); margin:4px 0;">${i["Titulo"]}</div>
-                <div style="font-size:0.9em; white-space:pre-wrap;">${i["Mensagem"]}</div>
-            </div>
-        `).join('');
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    // --- REUTILIZANDO AS OUTRAS FUNÇÕES ---
     function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
+    
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
@@ -170,9 +160,19 @@
 
         dias.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia);
-            let html = aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"]}</div><div class="grade-info"><b>${a["Matéria"]}</b><br><small style="opacity:0.7">👥 ${a["Grupo"] || 'Geral'}</small></div></div>`).join('');
+            let html = aulas.map(a => `<div class="grade-item"><div class="grade-hora">${a["Horários"]}</div><div class="grade-info"><b>${a["Matéria"]}</b><small style="opacity:0.7">👥 ${a["Grupo"] || 'Geral'}</small></div></div>`).join('');
             corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${dia}</summary><div>${html}</div></details>`;
         });
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    function abrirAvisos() {
+        const corpo = document.getElementById('modal-corpo');
+        document.getElementById('modal-titulo').innerText = "Avisos Recentes";
+        const itens = (dadosApp["Avisos"] || []).slice().reverse();
+        localStorage.setItem('avisos_lidos', (dadosApp["Avisos"] || []).length.toString());
+        document.getElementById('aviso-badge').style.display = 'none';
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center;'>Nenhum aviso.</p>" : itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med);"><small style="color:#888">${i["Data"]}</small><div style="font-weight:800; color:var(--p-med); margin:4px 0;">${i["Titulo"]}</div><div style="font-size:0.9em; white-space:pre-wrap;">${i["Mensagem"]}</div></div>`).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
