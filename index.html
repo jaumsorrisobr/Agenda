@@ -10,49 +10,71 @@
     <meta name="apple-mobile-web-app-title" content="Med Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=3">
-    <link rel="apple-touch-icon" href="icon.png?v=3">
-    <link rel="icon" type="image/png" href="icon.png?v=3">
+    <link rel="manifest" href="manifest.json?v=4">
+    <link rel="apple-touch-icon" href="icon.png?v=4">
+    <link rel="icon" type="image/png" href="icon.png?v=4">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; }
         [data-theme="light"] { --bg: #f4f7f6; --card-bg: #ffffff; --text-color: #333333; --shadow: rgba(0,0,0,0.1); --input-bg: #eeeeee; }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 60px; overflow-x: hidden; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 60px; overflow-x: hidden; width: 100vw; }
 
+        /* Splash Screen */
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s ease; }
         .logo-pulsando { width: 120px; animation: pulsar 2s infinite ease-in-out; }
         @keyframes pulsar { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
 
-        .header { text-align: center; margin-bottom: 20px; cursor: pointer; } /* Clique no topo para atualizar */
+        .header { text-align: center; margin-bottom: 20px; cursor: pointer; }
         #status-bar { font-size: 0.75em; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { background: var(--card-bg); height: 110px; border-radius: 18px; box-shadow: 0 4px 12px var(--shadow); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); }
         .card .icon { font-size: 2em; margin-bottom: 8px; }
         
+        /* Modais */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 15px; z-index: 2000; backdrop-filter: blur(10px); }
         .modal-content { background: var(--card-bg); padding: 20px; border-radius: 28px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.2); }
         .close-btn { position: absolute; top: 15px; right: 20px; background: #333; border: none; font-size: 20px; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         
-        /* Ajuste Fino da Grade (Print do Usuário) */
+        /* Grade - Correção de Alinhamento e Tamanho */
         .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; }
         .secao-titulo { background: rgba(0,123,255,0.15); color: #4dabff; padding: 16px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
         .secao-titulo::-webkit-details-marker { display: none; }
         .secao-titulo::after { content: '▼'; font-size: 10px; transition: 0.3s; }
         details[open] .secao-titulo::after { transform: rotate(180deg); }
 
-        .grade-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.2); }
-        .grade-hora { flex: 0 0 100px; color: #fff; font-weight: 800; font-size: 0.75em; text-align: center; background: var(--p-med); padding: 6px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,123,255,0.3); }
-        .grade-info { flex: 1; text-align: left; font-size: 0.95em; }
+        .grade-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); }
         
+        /* BOTÃO DE HORÁRIO PADRONIZADO */
+        .grade-hora { 
+            flex: 0 0 100px; 
+            height: 45px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff; 
+            font-weight: 800; 
+            font-size: 0.72em; 
+            text-align: center; 
+            background: var(--p-med); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 5px rgba(0,123,255,0.3); 
+        }
+
+        .grade-info { flex: 1; text-align: left; font-size: 0.9em; line-height: 1.2; }
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--input-bg); border-radius: 14px; margin: 8px 0; text-decoration: none; color: var(--text-color); }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; }
+        
+        /* Pull-to-refresh Visual */
+        #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; }
     </style>
 </head>
 <body data-theme="dark">
+
+<div id="ptr">Solte para atualizar...</div>
 
 <div id="splash">
     <img src="logo_UCP.png" class="logo-pulsando" onerror="this.src='https://via.placeholder.com/150?text=MED+UCP'">
@@ -63,10 +85,10 @@
 
 <div class="header" onclick="carregarDados()">
     <h2 style="margin:0; letter-spacing: -1px;">Medicina - Turma H</h2>
-    <div id="status-bar">Toque aqui para atualizar ↻</div>
+    <div id="status-bar">Toque para atualizar ↻</div>
 </div>
 
-<div class="grid-container">
+<div class="grid-container" id="main-content">
     <div class="card" onclick="abrirGrade()"><span class="icon">📅</span><span>Grade</span></div>
     <div class="card" onclick="abrirGrupos()"><span class="icon">👥</span><span>Grupos</span></div>
     <div class="card" onclick="abrirAvisos()"><span class="icon">🔔</span><span>Avisos</span></div>
@@ -84,8 +106,8 @@
     </div>
 </div>
 
-<div id="modalLinkAdmin" class="modal"><div class="modal-content"><button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button><h3 style="color:#28a745;">Postar Aula</h3><input type="password" id="senhaLink" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="dataLink" placeholder="Data (DD/MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="horaLink" placeholder="Horário (HH:MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="materiaLink" placeholder="Matéria" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="urlLink" placeholder="Link" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><button onclick="enviarDados('Links')" style="width:100%; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold;">ENVIAR</button><div id="msgLink"></div></div></div>
-<div id="modalAvisoAdmin" class="modal"><div class="modal-content"><button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button><h3 style="color:#ffc107;">Novo Aviso</h3><input type="password" id="senhaAviso" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="tituloAviso" placeholder="Título" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><textarea id="textoAviso" placeholder="Mensagem..." rows="4" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"></textarea><button onclick="enviarDados('Avisos')" style="width:100%; padding:15px; background:#ffc107; color:black; border:none; border-radius:10px; font-weight:bold;">POSTAR</button><div id="msgAviso"></div></div></div>
+<div id="modalLinkAdmin" class="modal"><div class="modal-content"><button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button><h3 style="color:#28a745;">Postar Aula</h3><input type="password" id="senhaLink" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="dataLink" placeholder="Data (DD/MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="horaLink" placeholder="Horário (HH:MM)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="materiaLink" placeholder="Matéria" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="urlLink" placeholder="Link" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><button onclick="enviarDados('Links')" style="width:100%; padding:15px; background:#28a745; color:white; border:none; border-radius:10px; font-weight:bold;">ENVIAR</button></div></div>
+<div id="modalAvisoAdmin" class="modal"><div class="modal-content"><button class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">✕</button><h3 style="color:#ffc107;">Novo Aviso</h3><input type="password" id="senhaAviso" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><input type="text" id="tituloAviso" placeholder="Título" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"><textarea id="textoAviso" placeholder="Mensagem..." rows="4" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#2d2d2d; color:white;"></textarea><button onclick="enviarDados('Avisos')" style="width:100%; padding:15px; background:#ffc107; color:black; border:none; border-radius:10px; font-weight:bold;">POSTAR</button></div></div>
 
 <div class="footer-creditos" id="btnAdmin" style="text-align: center; font-size: 11px; color: #888; margin-top: 40px;">
     Desenvolvido por João Vitor Fróis Sanchez
@@ -97,16 +119,32 @@
 
     window.onload = () => {
         carregarDados();
-        
-        // Configuração de Timers para Admin
         setupLongPress(document.getElementById('btnAulasOnline'), () => document.getElementById('modalLinkAdmin').style.display = 'flex');
         setupLongPress(document.getElementById('btnAdmin'), () => document.getElementById('modalAvisoAdmin').style.display = 'flex');
-
+        setupPullToRefresh();
+        
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
             setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
         }, 2000);
     };
+
+    function setupPullToRefresh() {
+        let touchStart = 0;
+        const ptr = document.getElementById('ptr');
+        window.addEventListener('touchstart', e => { if (window.scrollY === 0) touchStart = e.touches[0].pageY; });
+        window.addEventListener('touchmove', e => {
+            let touchMove = e.touches[0].pageY;
+            if (window.scrollY === 0 && touchMove > touchStart) {
+                let dist = touchMove - touchStart;
+                if (dist < 60) ptr.style.height = dist + 'px';
+            }
+        });
+        window.addEventListener('touchend', () => {
+            if (parseInt(ptr.style.height) > 40) carregarDados();
+            ptr.style.height = '0';
+        });
+    }
 
     function setupLongPress(element, callback) {
         let timer;
@@ -131,16 +169,14 @@
     }
 
     function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
-    
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '☀️';
     }
 
-    // Funções de Abertura (Grade, Avisos, etc)
     function abrirGrade() {
-        carregarDados(); // Atualiza em segundo plano ao abrir
+        carregarDados(); 
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
         corpo.innerHTML = "";
@@ -166,6 +202,7 @@
     }
 
     function abrirArquivos() {
+        carregarDados();
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Arquivos";
         corpo.innerHTML = "";
@@ -179,6 +216,7 @@
     }
 
     function abrirGrupos() {
+        carregarDados();
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grupos";
         corpo.innerHTML = `<input type="text" id="buscag" placeholder="🔍 Buscar aluno ou matéria..." style="width:100%; padding:12px; border-radius:10px; background:var(--input-bg); color:white; border:1px solid #444; margin-bottom:15px;" onkeyup="filtrarG()"> <div id="cg"></div>`;
@@ -220,7 +258,7 @@
         const d = tipo === 'Links' ? { aba: tipo, senha: document.getElementById('senhaLink').value, data: document.getElementById('dataLink').value, horario: document.getElementById('horaLink').value, materia: document.getElementById('materiaLink').value, url: document.getElementById('urlLink').value } : { aba: tipo, senha: document.getElementById('senhaAviso').value, titulo: document.getElementById('tituloAviso').value, mensagem: document.getElementById('textoAviso').value };
         try {
             await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(d) });
-            alert("Enviado com sucesso!");
+            alert("Sucesso! O app será reiniciado.");
             location.reload();
         } catch (e) { alert("Erro ao enviar."); }
     }
