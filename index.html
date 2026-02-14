@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Medicina - Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=13">
-    <link rel="apple-touch-icon" href="icon.png?v=13">
-    <link rel="icon" type="image/png" href="icon.png?v=13">
+    <link rel="manifest" href="manifest.json?v=14">
+    <link rel="apple-touch-icon" href="icon.png?v=14">
+    <link rel="icon" type="image/png" href="icon.png?v=14">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; --danger: #ff3b30; }
@@ -36,7 +36,12 @@
         @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-3px); } }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 15px; z-index: 2000; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.2); }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.2); text-align: left !important; }
+        
+        /* Forçando títulos e textos para a esquerda */
+        #modal-titulo { text-align: left !important; display: block; width: 100%; margin-bottom: 20px; color: var(--p-med); font-weight: 800; }
+        #modal-corpo { text-align: left !important; width: 100%; }
+
         .close-btn { position: absolute; top: 15px; right: 20px; background: #333; border: none; font-size: 20px; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
         .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; }
@@ -46,9 +51,9 @@
         .grade-hora { flex: 0 0 100px; height: 45px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.72em; text-align: center; background: var(--p-med); border-radius: 10px; }
         
         .item-lista-link { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 12px; text-decoration: none; color: inherit; margin-bottom: 8px; text-align: left; }
-        .item-aguardando { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed #444; border-radius: 12px; color: #888; margin: 10px; font-style: italic; font-size: 0.85em; }
+        .item-aguardando { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed #444; border-radius: 12px; color: #888; margin: 10px; font-style: italic; font-size: 0.85em; text-align: left; }
 
-        .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #444; background: var(--input-bg); color: var(--text-color); font-size: 16px; }
+        .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #444; background: var(--input-bg); color: var(--text-color); font-size: 16px; text-align: left; }
         .admin-btn { width: 100%; padding: 15px; background: var(--p-med); color: white; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
         .footer-creditos { text-align: center; font-size: 11px; color: #666; margin-top: 50px; padding: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); user-select: none; }
@@ -86,7 +91,13 @@
     </div>
 </div>
 
-<div id="meuModal" class="modal"><div class="modal-content"><button class="close-btn" onclick="fecharModal()">✕</button><h3 id="modal-titulo" style="margin-bottom:20px; color:var(--p-med); text-align: left;"></h3><div id="modal-corpo"></div></div></div>
+<div id="meuModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="fecharModal()">✕</button>
+        <h3 id="modal-titulo"></h3>
+        <div id="modal-corpo"></div>
+    </div>
+</div>
 
 <div class="footer-creditos" id="meuNome">
     Desenvolvido por João Vitor Fróis Sanchez
@@ -123,14 +134,14 @@
 
     function fecharModal() { 
         document.getElementById('meuModal').style.display = 'none'; 
-        carregarDados(); // <--- ATUALIZA AO SAIR DO MENU
+        carregarDados(); 
     }
 
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '☀️';
-        carregarDados(); // <--- ATUALIZA AO MUDAR O TEMA
+        carregarDados(); 
     }
 
     function verificarNovosAvisos() {
@@ -196,7 +207,7 @@
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Aulas Online";
         const itens = dadosApp["Links"] || [];
-        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center;'>Nenhuma aula agendada.</p>" : itens.map(i => `
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Nenhuma aula agendada.</p>" : itens.map(i => `
             <div style="padding:15px; background:var(--input-bg); border-radius:15px; margin-bottom:10px; text-align:left;">
                 <b>${i["Materia"] || i["Matéria"]}</b><br>
                 <small style="opacity:0.7;">🗓️ ${i["Data"]} - ${i["Horário"] || i["Horario"]}</small>
@@ -209,7 +220,7 @@
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Avisos Recentes";
         const itens = (dadosApp["Avisos"] || []).slice().reverse();
-        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center;'>Sem avisos.</p>" : itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med); text-align:left;"><small style="color:#888;">${i["Data"]}</small><br><b style="color:var(--p-med);">${i["Titulo"]}</b><p style="font-size:0.9em; margin-top:5px; white-space:pre-wrap;">${i["Mensagem"]}</p></div>`).join('');
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:left;'>Sem avisos.</p>" : itens.map(i => `<div style="background:rgba(0,123,255,0.05); padding:15px; border-radius:15px; margin-bottom:12px; border-left:4px solid var(--p-med); text-align:left;"><small style="color:#888;">${i["Data"]}</small><br><b style="color:var(--p-med);">${i["Titulo"]}</b><p style="font-size:0.9em; margin-top:5px; white-space:pre-wrap;">${i["Mensagem"]}</p></div>`).join('');
         localStorage.setItem('avisos_lidos', (dadosApp["Avisos"] || []).length);
         document.getElementById('aviso-badge').style.display = 'none';
         document.getElementById('meuModal').style.display = 'flex';
@@ -231,7 +242,7 @@
     function abrirGrupos() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grupos";
-        corpo.innerHTML = `<input type="text" id="buscag" placeholder="🔍 Buscar aluno ou matéria..." style="width:100%; padding:12px; border-radius:10px; background:var(--input-bg); color:white; border:1px solid #444; margin-bottom:15px;" onkeyup="filtrarG()"> <div id="cg"></div>`;
+        corpo.innerHTML = `<input type="text" id="buscag" placeholder="🔍 Buscar aluno ou matéria..." style="width:100%; padding:12px; border-radius:10px; background:var(--input-bg); color:white; border:1px solid #444; margin-bottom:15px; text-align: left;" onkeyup="filtrarG()"> <div id="cg"></div>`;
         renderGrupos(dadosApp["Grupos"] || []);
         document.getElementById('meuModal').style.display = 'flex';
     }
@@ -244,9 +255,9 @@
             const nomes = [...new Set(gMat.map(g => g["Nome do Grupo"]))];
             let h = nomes.map(ng => {
                 const mb = gMat.filter(g => g["Nome do Grupo"] === ng).map(m => `<li>${m["Integrantes"]}</li>`).join('');
-                return `<details style="margin:5px 0; border:1px solid #333; border-radius:8px; text-align:left;"><summary style="padding:10px; font-weight:bold; cursor:pointer;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px;">${mb}</ul></details>`;
+                return `<details style="margin:5px 0; border:1px solid #333; border-radius:8px; text-align:left;"><summary style="padding:10px; font-weight:bold; cursor:pointer;">${ng}</summary><ul style="font-size:0.85em; color:#bbb; padding-bottom:10px; text-align: left;">${mb}</ul></details>`;
             }).join('');
-            container.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${m}</summary><div style="padding:5px 10px;">${h}</div></details>`;
+            container.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${m}</summary><div style="padding:5px 10px; text-align: left;">${h}</div></details>`;
         });
     }
 
@@ -268,14 +279,11 @@
         document.getElementById('meuModal').style.display = 'flex';
     }
 
-    // --- PULL TO REFRESH (PUXAR PARA BAIXO) ---
+    // --- PULL TO REFRESH ---
     function setupPullToRefresh() {
         let touchStart = 0;
         const ptr = document.getElementById('ptr');
-        window.addEventListener('touchstart', e => { 
-            if (window.scrollY === 0) touchStart = e.touches[0].pageY; 
-        }, {passive: true});
-        
+        window.addEventListener('touchstart', e => { if (window.scrollY === 0) touchStart = e.touches[0].pageY; }, {passive: true});
         window.addEventListener('touchmove', e => {
             let touchMove = e.touches[0].pageY;
             if (window.scrollY === 0 && touchMove > touchStart) {
@@ -286,7 +294,6 @@
                 }
             }
         }, {passive: true});
-        
         window.addEventListener('touchend', () => {
             if (parseInt(ptr.style.height) > 50) carregarDados();
             ptr.style.height = '0';
