@@ -2,24 +2,24 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Medicine - Turma H</title>
+    <title>Agenda Medicina - Turma H</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Med Turma H">
+    <meta name="apple-mobile-web-app-title" content="Medicina - Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=9">
-    <link rel="apple-touch-icon" href="icon.png?v=9">
-    <link rel="icon" type="image/png" href="icon.png?v=9">
+    <link rel="manifest" href="manifest.json?v=10">
+    <link rel="apple-touch-icon" href="icon.png?v=10">
+    <link rel="icon" type="image/png" href="icon.png?v=10">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; --danger: #ff3b30; }
         [data-theme="light"] { --bg: #f4f7f6; --card-bg: #ffffff; --text-color: #333333; --shadow: rgba(0,0,0,0.1); --input-bg: #eeeeee; }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 60px; overflow-x: hidden; width: 100vw; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text-color); transition: background 0.3s; padding-bottom: 80px; overflow-x: hidden; width: 100vw; }
 
         #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.8s ease; }
         .logo-pulsando { width: 120px; animation: pulsar 2s infinite ease-in-out; }
@@ -44,15 +44,14 @@
         .secao-titulo::-webkit-details-marker { display: none; }
         .secao-titulo::after { content: '▼'; font-size: 10px; opacity: 0.5; }
 
-        /* Estilos da Grade */
         .grade-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); }
         .grade-hora { flex: 0 0 100px; height: 45px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.72em; text-align: center; background: var(--p-med); border-radius: 10px; }
         .grade-info { flex: 1; text-align: left; font-size: 0.9em; display: flex; flex-direction: column; }
 
-        /* Estilo para itens vazios (Aguardando) */
         .item-aguardando { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px dashed #444; border-radius: 12px; color: #888; margin: 10px; text-align: left; font-style: italic; font-size: 0.85em; }
-
         .item-lista-link { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border-radius: 12px; text-decoration: none; color: inherit; margin-bottom: 8px; text-align: left; }
+
+        .footer-creditos { text-align: center; font-size: 11px; color: #666; margin-top: 50px; padding: 20px 0; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; }
         #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; }
@@ -71,7 +70,7 @@
 
 <div class="header" onclick="carregarDados()">
     <h2 style="margin:0; letter-spacing: -1px;">Medicina - Turma H</h2>
-    <div id="status-bar">Carregando...</div>
+    <div id="status-bar">Sincronizando...</div>
 </div>
 
 <div class="grid-container">
@@ -89,7 +88,7 @@
 
 <div id="meuModal" class="modal"><div class="modal-content"><button class="close-btn" onclick="fecharModal()">✕</button><h3 id="modal-titulo" style="margin-bottom:20px; color:var(--p-med); text-align: left;"></h3><div id="modal-corpo"></div></div></div>
 
-<div class="footer-creditos" id="btnAdmin" style="text-align: center; font-size: 11px; color: #888; margin-top: 40px; cursor:pointer;">
+<div class="footer-creditos">
     Desenvolvido por João Vitor Fróis Sanchez
 </div>
 
@@ -107,15 +106,16 @@
     };
 
     async function carregarDados() {
-        document.getElementById('status-bar').innerText = "Sincronizando...";
+        const status = document.getElementById('status-bar');
+        status.innerText = "Sincronizando...";
         try {
             const res = await fetch(`${URL_API}?t=${new Date().getTime()}`);
             dadosApp = await res.json();
             localStorage.setItem('med_h_cache', JSON.stringify(dadosApp));
-            document.getElementById('status-bar').innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+            status.innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
             verificarNovosAvisos();
         } catch (e) {
-            document.getElementById('status-bar').innerText = "Modo Offline";
+            status.innerText = "Modo Offline";
             verificarNovosAvisos();
         }
     }
@@ -134,35 +134,24 @@
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '☀️';
     }
 
-    // CORREÇÃO DA GRADE: Agora verifica se a matéria existe
     function abrirGrade() {
-        carregarDados(); 
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
         corpo.innerHTML = "";
         const itens = dadosApp["Grade"] || [];
         const ordem = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-        const dias = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a,b) => ordem.findIndex(d => a.includes(d)) - ordem.findIndex(d => b.includes(d)));
+        const diasExistentes = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a,b) => ordem.findIndex(d => a.includes(d)) - ordem.findIndex(d => b.includes(d)));
 
-        dias.forEach(dia => {
+        diasExistentes.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia);
-            
-            // Filtra apenas aulas que possuem nome da matéria
             const aulasValidas = aulas.filter(a => a["Matéria"] && a["Matéria"].trim() !== "");
-
-            let html = "";
-            if (aulasValidas.length === 0) {
-                html = `<div class="item-aguardando"><span>Aguardando aulas...</span><span>⏳</span></div>`;
-            } else {
-                html = aulasValidas.map(a => `
+            let html = (aulasValidas.length === 0) ? 
+                `<div class="item-aguardando"><span>Aguardando aulas...</span><span>⏳</span></div>` :
+                aulasValidas.map(a => `
                     <div class="grade-item">
                         <div class="grade-hora">${a["Horários"]}</div>
-                        <div class="grade-info">
-                            <b>${a["Matéria"]}</b>
-                            <small style="opacity:0.7">👥 ${a["Grupo"] || 'Geral'}</small>
-                        </div>
+                        <div class="grade-info"><b>${a["Matéria"]}</b><small style="opacity:0.7">👥 ${a["Grupo"] || 'Geral'}</small></div>
                     </div>`).join('');
-            }
             corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${dia}</summary><div>${html}</div></details>`;
         });
         document.getElementById('meuModal').style.display = 'flex';
@@ -179,7 +168,6 @@
     }
 
     function abrirArquivos() {
-        carregarDados();
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Arquivos";
         corpo.innerHTML = "";
@@ -189,9 +177,8 @@
             let html = links.map(a => {
                 if (!a["Links"] || a["Links"].trim() === "" || a["Links"] === "#") {
                     return `<div class="item-aguardando"><span>${a["Descrição"]} (Aguardando arquivos...)</span><span>⏳</span></div>`;
-                } else {
-                    return `<a href="${a["Links"]}" target="_blank" class="item-lista-link"><b>${a["Descrição"]}</b><span>📂</span></a>`;
                 }
+                return `<a href="${a["Links"]}" target="_blank" class="item-lista-link"><b>${a["Descrição"]}</b><span>📂</span></a>`;
             }).join('');
             corpo.innerHTML += `<details class="secao-retratil"><summary class="secao-titulo">${n}</summary><div style="padding:10px;">${html}</div></details>`;
         });
@@ -199,7 +186,6 @@
     }
 
     function abrirGrupos() {
-        carregarDados();
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grupos";
         corpo.innerHTML = `<input type="text" id="buscag" placeholder="🔍 Buscar aluno ou matéria..." style="width:100%; padding:12px; border-radius:10px; background:var(--input-bg); color:white; border:1px solid #444; margin-bottom:15px; text-align: left;" onkeyup="filtrarG()"> <div id="cg"></div>`;
@@ -229,11 +215,17 @@
     }
 
     function abrirLinks() {
-        carregarDados();
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Aulas Online";
         const itens = dadosApp["Links"] || [];
-        corpo.innerHTML = itens.map(i => `<div style="padding:15px; background:var(--input-bg); border-radius:15px; margin-bottom:10px; display:flex; flex-direction:column; text-align: left;"><b>${i["Materia"]}</b><small style="opacity:0.7; margin:5px 0;">🗓️ ${i["Data"]} - ${i["Horário"]}</small><a href="${i["Url"]}" target="_blank" style="background:var(--p-med); color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:5px;">ACESSAR</a></div>`).join('');
+        corpo.innerHTML = itens.length === 0 ? "<p style='text-align:center;'>Nenhuma aula online agendada.</p>" : itens.map(i => {
+            // Suporte para nomes de campos com ou sem acento vindo da planilha
+            const m = i["Materia"] || i["Matéria"] || "Matéria Indefinida";
+            const d = i["Data"] || "";
+            const h = i["Horário"] || i["Horario"] || "";
+            const u = i["Url"] || i["URL"] || i["Links"] || "#";
+            return `<div style="padding:15px; background:var(--input-bg); border-radius:15px; margin-bottom:10px; display:flex; flex-direction:column; text-align: left;"><b>${m}</b><small style="opacity:0.7; margin:5px 0;">🗓️ ${d} - ${h}</small><a href="${u}" target="_blank" style="background:var(--p-med); color:white; text-decoration:none; padding:10px; border-radius:8px; width:100%; text-align:center; font-weight:bold; margin-top:5px;">ACESSAR</a></div>`;
+        }).join('');
         document.getElementById('meuModal').style.display = 'flex';
     }
 
@@ -256,4 +248,3 @@
 </script>
 </body>
 </html>
-
