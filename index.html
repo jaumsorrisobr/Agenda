@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Medicina - Turma H">
     <meta name="theme-color" content="#007bff">
 
-    <link rel="manifest" href="manifest.json?v=12">
-    <link rel="apple-touch-icon" href="icon.png?v=12">
-    <link rel="icon" type="image/png" href="icon.png?v=12">
+    <link rel="manifest" href="manifest.json?v=13">
+    <link rel="apple-touch-icon" href="icon.png?v=13">
+    <link rel="icon" type="image/png" href="icon.png?v=13">
 
     <style>
         :root { --p-med: #007bff; --bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --shadow: rgba(0,0,0,0.5); --input-bg: #2d2d2d; --danger: #ff3b30; }
@@ -39,10 +39,8 @@
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; border: 1px solid rgba(0,123,255,0.2); }
         .close-btn { position: absolute; top: 15px; right: 20px; background: #333; border: none; font-size: 20px; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
-        /* Estilos das Listas Internas */
         .secao-retratil { margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,123,255,0.1); overflow: hidden; }
         .secao-titulo { background: rgba(0,123,255,0.15); color: #4dabff; padding: 16px; font-weight: 800; font-size: 0.85em; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; text-align: left; }
-        .secao-titulo::after { content: '▼'; font-size: 10px; opacity: 0.5; }
 
         .grade-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1); background: rgba(0,0,0,0.1); text-align: left; }
         .grade-hora { flex: 0 0 100px; height: 45px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.72em; text-align: center; background: var(--p-med); border-radius: 10px; }
@@ -56,7 +54,7 @@
         .footer-creditos { text-align: center; font-size: 11px; color: #666; margin-top: 50px; padding: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); user-select: none; }
 
         #theme-toggle { position: fixed; bottom: 25px; right: 25px; background: var(--card-bg); border: 2px solid var(--p-med); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 999; }
-        #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; }
+        #ptr { text-align: center; height: 0; overflow: hidden; transition: height 0.2s; color: var(--p-med); font-size: 0.8em; font-weight: bold; line-height: 40px; }
     </style>
 </head>
 <body data-theme="dark">
@@ -123,17 +121,22 @@
         }
     }
 
-    function verificarNovosAvisos() {
-        const avisos = dadosApp["Avisos"] || [];
-        const lidos = parseInt(localStorage.getItem('avisos_lidos') || "0");
-        document.getElementById('aviso-badge').style.display = (avisos.length > lidos) ? 'block' : 'none';
+    function fecharModal() { 
+        document.getElementById('meuModal').style.display = 'none'; 
+        carregarDados(); // <--- ATUALIZA AO SAIR DO MENU
     }
 
-    function fecharModal() { document.getElementById('meuModal').style.display = 'none'; }
     function toggleTheme() {
         const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', n);
         document.getElementById('theme-icon').innerText = n === 'dark' ? '🌙' : '☀️';
+        carregarDados(); // <--- ATUALIZA AO MUDAR O TEMA
+    }
+
+    function verificarNovosAvisos() {
+        const avisos = dadosApp["Avisos"] || [];
+        const lidos = parseInt(localStorage.getItem('avisos_lidos') || "0");
+        document.getElementById('aviso-badge').style.display = (avisos.length > lidos) ? 'block' : 'none';
     }
 
     // --- LOGICA DE ADMIN (LONG PRESS 5s) ---
@@ -152,18 +155,6 @@
         configurar('meuNome', abrirPainelAvisos);
     }
 
-    function abrirPainelLinks() {
-        document.getElementById('modal-titulo').innerText = "Postar Aula Online";
-        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-data" placeholder="Data (DD/MM/AAAA)"><input type="text" id="adm-hora" placeholder="Horário (HH:MM)"><input type="text" id="adm-materia" placeholder="Matéria"><input type="text" id="adm-url" placeholder="URL"><button class="admin-btn" onclick="publicar('Links')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px;"></p></div>`;
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
-    function abrirPainelAvisos() {
-        document.getElementById('modal-titulo').innerText = "Postar Aviso";
-        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-titulo" placeholder="Título"><textarea id="adm-msg" placeholder="Mensagem..." rows="4"></textarea><button class="admin-btn" onclick="publicar('Avisos')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px;"></p></div>`;
-        document.getElementById('meuModal').style.display = 'flex';
-    }
-
     async function publicar(aba) {
         const status = document.getElementById('adm-status');
         const payload = { senha: document.getElementById('adm-senha').value, aba: aba };
@@ -179,12 +170,12 @@
         status.innerText = "Publicando...";
         try {
             await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            status.innerText = "✅ Sucesso! Atualize o app.";
-            setTimeout(fecharModal, 2000);
+            status.innerText = "✅ Sucesso!";
+            setTimeout(fecharModal, 1500);
         } catch(e) { status.innerText = "❌ Erro."; }
     }
 
-    // --- EXIBIÇÃO RESTAURADA ---
+    // --- FUNÇÕES DE EXIBIÇÃO ---
     function abrirGrade() {
         const corpo = document.getElementById('modal-corpo');
         document.getElementById('modal-titulo').innerText = "Grade de Aulas";
@@ -192,7 +183,6 @@
         const itens = dadosApp["Grade"] || [];
         const ordem = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
         const dias = [...new Set(itens.map(a => a["Dia da Semana"]))].sort((a,b) => ordem.findIndex(d => a.includes(d)) - ordem.findIndex(d => b.includes(d)));
-
         dias.forEach(dia => {
             const aulas = itens.filter(a => a["Dia da Semana"] === dia && a["Matéria"] && a["Matéria"].trim() !== "");
             let html = aulas.length === 0 ? `<div class="item-aguardando"><span>Aguardando aulas...</span><span>⏳</span></div>` :
@@ -247,8 +237,7 @@
     }
 
     function renderGrupos(lista) {
-        const container = document.getElementById('cg');
-        container.innerHTML = "";
+        const container = document.getElementById('cg'); container.innerHTML = "";
         const mats = [...new Set(lista.map(i => i["Matéria"]))];
         mats.forEach(m => {
             const gMat = lista.filter(i => i["Matéria"] === m);
@@ -267,19 +256,39 @@
         renderGrupos(f);
     }
 
+    function abrirPainelLinks() {
+        document.getElementById('modal-titulo').innerText = "Postar Aula Online";
+        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-data" placeholder="Data (DD/MM/AAAA)"><input type="text" id="adm-hora" placeholder="Horário (HH:MM)"><input type="text" id="adm-materia" placeholder="Matéria"><input type="text" id="adm-url" placeholder="URL"><button class="admin-btn" onclick="publicar('Links')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    function abrirPainelAvisos() {
+        document.getElementById('modal-titulo').innerText = "Postar Aviso";
+        document.getElementById('modal-corpo').innerHTML = `<div class="admin-form"><input type="password" id="adm-senha" placeholder="Senha"><input type="text" id="adm-titulo" placeholder="Título"><textarea id="adm-msg" placeholder="Mensagem..." rows="4"></textarea><button class="admin-btn" onclick="publicar('Avisos')">Publicar</button><p id="adm-status" style="text-align:center; margin-top:10px; font-size:12px;"></p></div>`;
+        document.getElementById('meuModal').style.display = 'flex';
+    }
+
+    // --- PULL TO REFRESH (PUXAR PARA BAIXO) ---
     function setupPullToRefresh() {
         let touchStart = 0;
         const ptr = document.getElementById('ptr');
-        window.addEventListener('touchstart', e => { if (window.scrollY === 0) touchStart = e.touches[0].pageY; });
+        window.addEventListener('touchstart', e => { 
+            if (window.scrollY === 0) touchStart = e.touches[0].pageY; 
+        }, {passive: true});
+        
         window.addEventListener('touchmove', e => {
             let touchMove = e.touches[0].pageY;
             if (window.scrollY === 0 && touchMove > touchStart) {
                 let dist = touchMove - touchStart;
-                if (dist < 60) ptr.style.height = dist + 'px';
+                if (dist > 5 && dist < 70) {
+                    ptr.style.height = dist + 'px';
+                    if (dist > 50) ptr.innerText = "Solte para atualizar...";
+                }
             }
-        });
+        }, {passive: true});
+        
         window.addEventListener('touchend', () => {
-            if (parseInt(ptr.style.height) > 40) carregarDados();
+            if (parseInt(ptr.style.height) > 50) carregarDados();
             ptr.style.height = '0';
         });
     }
